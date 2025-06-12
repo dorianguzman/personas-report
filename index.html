@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personas Africa Case Study - Performance Report</title>
+    <meta name="description" content="Data-driven results from our AI Agent deployment in Africa. Real performance metrics and insights from autonomous marketing campaigns.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'Youth';
+            src: url("assets/Youth-Light.woff2") format('woff2'),
+                 url("assets/Youth-Light.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'Youth';
+            src: url("assets/Youth-Medium.woff2") format('woff2'),
+                 url("assets/Youth-Medium.otf") format("opentype");
+            font-weight: bold;
+        }
+
+        :root {
+            --primary-green: #c4fb01;
+            --primary-cyan: #00bcd4;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --bg-card-hover: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(196, 251, 1, 0.3);
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-elevated: 0 20px 60px rgba(196, 251, 1, 0.1);
+            --gradient-primary: linear-gradient(135deg, rgba(196, 251, 1, 0.15) 0%, rgba(0, 188, 212, 0.1) 100%);
+            --gradient-text: linear-gradient(135deg, #c4fb01 0%, #00bcd4 100%);
+            --chart-bg: #292929;
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            font-family: 'Geologica', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .youth {
+            font-family: 'Youth', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Background effect */
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23c4fb01' fill-opacity='0.02' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        /* Glow effect */
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary-green) 0%, transparent 70%);
+            filter: blur(80px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .glow-1 {
+            top: -150px;
+            right: -100px;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .glow-2 {
+            bottom: -150px;
+            left: -100px;
+            background: radial-gradient(circle, var(--primary-cyan) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(30px, -30px); }
+            66% { transform: translate(-20px, 20px); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 2rem 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .report-period {
+            color: var(--primary-green);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition-smooth);
+            backdrop-filter: blur(10px);
+        }
+
+        .metric-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-change {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--primary-cyan);
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-title {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .legend {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .impressions-dot {
+            background: var(--primary-green);
+        }
+
+        .clicks-dot {
+            background: var(--primary-cyan);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--chart-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Summary Table */
+        .summary-section {
+            margin-bottom: 4rem;
+        }
+
+        .summary-table {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-table th {
+            background: rgba(196, 251, 1, 0.05);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            color: var(--primary-green);
+        }
+
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .summary-table td {
+            font-size: 1.1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Insights Section */
+        .insights-section {
+            background: var(--gradient-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .insights-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .insight-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-text);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .insight-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--gradient-text);
+            color: var(--bg-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: var(--transition-smooth);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(196, 251, 1, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .report-title {
+                font-size: 2rem;
+            }
+
+            .metric-value {
+                font-size: 2.5rem;
+            }
+
+            .chart-section {
+                padding: 2rem;
+            }
+
+            .insights-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-layer"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo youth">Personas</div>
+            <p class="subtitle">AI Agent Performance Report</p>
+            <h1 class="report-title">Agent in Africa Case Study</h1>
+            <p class="report-period youth">May 27 - June 6, 2024</p>
+        </header>
+
+        <!-- Key Metrics -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">142K</div>
+                <div class="metric-label">Total Impressions</div>
+                <div class="metric-change">+289% growth</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">562</div>
+                <div class="metric-label">Total Clicks</div>
+                <div class="metric-change">+187% peak performance</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">0.40%</div>
+                <div class="metric-label">Average CTR</div>
+                <div class="metric-change">Industry benchmark: 0.05%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">11</div>
+                <div class="metric-label">Days Campaign</div>
+                <div class="metric-change">Fully autonomous</div>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="chart-section">
+            <div class="chart-header">
+                <h2 class="chart-title youth">Daily Performance Metrics</h2>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot impressions-dot"></div>
+                        <span>Impressions</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot clicks-dot"></div>
+                        <span>Clicks</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-placeholder">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary Table -->
+        <section class="summary-section">
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Daily Average</th>
+                        <th>Peak Performance</th>
+                        <th>Growth Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Impressions</td>
+                        <td>12,936</td>
+                        <td>35,031 (June 2)</td>
+                        <td>+289%</td>
+                    </tr>
+                    <tr>
+                        <td>Clicks</td>
+                        <td>51</td>
+                        <td>109 (June 2)</td>
+                        <td>+187%</td>
+                    </tr>
+                    <tr>
+                        <td>CTR</td>
+                        <td>0.40%</td>
+                        <td>0.67% (May 28)</td>
+                        <td>+68%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Insights Section -->
+        <section class="insights-section">
+            <h2 class="insights-title youth">Key Insights & Achievements</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">🚀</div>
+                    <h3 class="insight-title">Explosive Growth</h3>
+                    <p class="insight-text">The AI agent achieved a 289% growth in impressions within 11 days, demonstrating rapid market adaptation and optimization capabilities.</p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🎯</div>
+                    <h3 class="insight-title">Superior CTR Performance</h3>
+                    <p class="insight-text">With an average CTR of 0.40%, our agent outperformed industry benchmarks by 8x, showcasing advanced targeting precision.</p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🤖</div>
+                    <h3 class="insight-title">Autonomous Optimization</h3>
+                    <p class="insight-text">The agent independently identified peak performance windows and adjusted bidding strategies, maximizing ROI without human intervention.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">Ready to deploy AI agents for your performance marketing?</p>
+            <a href="https://www.qstarlabs.ai" class="cta-button youth">Get Started</a>
+        </footer>
+    </div>
+
+    <!-- Chart.js Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart data
+        const chartData = {
+            labels: ['May 27', 'May 28', 'May 29', 'May 30', 'May 31', 'June 1', 'June 2', 'June 3', 'June 4', 'June 5', 'June 6'],
+            impressions: [9002, 3140, 5708, 8673, 18829, 10406, 35031, 20601, 15871, 12990, 3046],
+            clicks: [38, 59, 32, 54, 47, 38, 109, 68, 40, 31, 46]
+        };
+
+        // Create chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Impressions',
+                    data: chartData.impressions,
+                    backgroundColor: 'rgba(196, 251, 1, 0.6)',
+                    borderColor: '#c4fb01',
+                    borderWidth: 2,
+                    yAxisID: 'y-impressions',
+                    order: 2
+                }, {
+                    label: 'Clicks',
+                    data: chartData.clicks,
+                    type: 'line',
+                    backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                    borderColor: '#00bcd4',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#00bcd4',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    tension: 0.4,
+                    yAxisID: 'y-clicks',
+                    order: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toLocaleString();
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#a0a0a0',
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    'y-impressions': {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#a0a0a0',
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Impressions',
+                            color: '#c4fb01',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    'y-clicks': {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#a0a0a0',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Clicks',
+                            color: '#00bcd4',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
