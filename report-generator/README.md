@@ -2,70 +2,38 @@
 
 Professional performance report generator for Twitter/X analytics with beautiful Personas branding.
 
-## 🚀 Quick Start
+## ⚡ Quick Start
 
-```bash
-# Open the report generator in your browser
-open report_generator.html
-```
+**🌐 Try Online:** [Report Generator](https://dorianguzman.github.io/personas-report/report-generator/report_generator.html)  
+**💻 Local:** Open `report_generator.html` in your browser
 
 ## 📁 Files
 
-- **`report_generator.html`** - Main application interface
-- **`report_template.html`** - Template for generated reports
-- **`assets/`** - Fonts and styling resources
+**`report_generator.html`** - Main application • **`report_template.html`** - Report template • **`assets/`** - Fonts & styling
 
 ## ✨ Features
 
-### 🎨 **Visual Design**
-- Animated hexagon backgrounds
-- Floating glow effects
-- Glass-morphism cards
-- Professional gradients
-
-### 📊 **Analytics**
-- Real-time chart visualizations
-- Automatic CTR calculations
-- Growth rate analysis
-- Industry benchmarks
-
-### 📄 **Export Formats**
-- Interactive Web Reports (HTML)
-- Professional PDF Reports
-- High-quality PNG Images
-- Raw Data (CSV)
-- Summary Reports (TXT)
+**🎨 Visual Design:** Animated hexagons • Floating glow effects • Glass-morphism cards • Professional gradients  
+**📊 Analytics:** Real-time charts • Automatic CTR calculations • Growth rate analysis • Industry benchmarks  
+**📄 Export Formats:** HTML • PDF • PNG • CSV • TXT
 
 ## 🛠️ Usage
 
-1. **Upload CSV** - Twitter/X analytics data
-2. **Enter Campaign Info** - Name and client details
-3. **Add Click Data** - Manual entry or CSV upload
-4. **Generate Reports** - Multiple formats with one click
+**Steps:** Upload CSV → Enter campaign info → Add click data → Generate reports
 
 ## 📊 Data Requirements
 
-### Twitter/X Analytics CSV
-- `Date` column (required)
-- `Impressions` column (required)
-
-### Click Data
-- Enter manually in the interface
-- Or upload separate CSV with Date and Clicks columns
+**Required:** CSV with `Date` and `Impressions` columns  
+**Click Data:** Manual entry or separate CSV upload
 
 ## 🎨 Branding
 
-- **Primary Green:** `#c4fb01`
-- **Primary Cyan:** `#00bcd4`
-- **Youth Font:** Custom Personas typography
-- **Dark Theme:** Professional appearance
+**Colors:** Primary Green `#c4fb01` • Cyan `#00bcd4` • Dark Theme  
+**Typography:** Youth Font (custom Personas) • Professional appearance
 
 ## 🔧 Technical
 
-- Pure HTML/CSS/JavaScript
-- No installation required
-- Works offline
-- Modern browser compatible
+**Stack:** Pure HTML/CSS/JavaScript • No installation • Works offline • Modern browser compatible
 
 ---
 
