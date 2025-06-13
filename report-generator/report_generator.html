@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personas Report Generator - Complete Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'Youth';
+            src: url("/assets/Youth-Light.woff2") format('woff2'),
+                 url("/assets/Youth-Light.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'Youth';
+            src: url("/assets/Youth-Medium.woff2") format('woff2'),
+                 url("/assets/Youth-Medium.otf") format("opentype");
+            font-weight: bold;
+        }
+
+        :root {
+            --primary-green: #c4fb01;
+            --primary-cyan: #00bcd4;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --bg-card-hover: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(196, 251, 1, 0.3);
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-elevated: 0 20px 60px rgba(196, 251, 1, 0.1);
+            --gradient-primary: linear-gradient(135deg, rgba(196, 251, 1, 0.15) 0%, rgba(0, 188, 212, 0.1) 100%);
+            --gradient-text: linear-gradient(135deg, #c4fb01 0%, #00bcd4 100%);
+            --chart-bg: #292929;
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            font-family: 'Geologica', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .youth {
+            font-family: 'Youth', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Enhanced background with parallax effect */
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .background-layer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23c4fb01' fill-opacity='0.02' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: backgroundFloat 20s ease-in-out infinite;
+        }
+
+        .background-layer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(196, 251, 1, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(0, 188, 212, 0.02) 0%, transparent 50%);
+            animation: floatingOrbs 30s ease-in-out infinite;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.5deg); }
+        }
+
+        @keyframes floatingOrbs {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-20px, -20px) scale(1.1); }
+            50% { transform: translate(20px, -10px) scale(0.9); }
+            75% { transform: translate(-10px, 20px) scale(1.05); }
+        }
+
+        /* Glow effect */
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary-green) 0%, transparent 70%);
+            filter: blur(80px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .glow-1 {
+            top: -150px;
+            right: -100px;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .glow-2 {
+            bottom: -150px;
+            left: -100px;
+            background: radial-gradient(circle, var(--primary-cyan) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(30px, -30px); }
+            66% { transform: translate(-20px, 20px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: var(--primary-green);
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-size: 1.2rem;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .section:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        h2 {
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .upload-section {
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            /* Inherit all .btn and .btn-primary styles for full consistency */
+            @apply .btn .btn-primary; /* (for Tailwind, but for raw CSS, copy properties) */
+            display: inline-block;
+            background: var(--gradient-text);
+            color: var(--bg-primary);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(196, 251, 1, 0.3);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th {
+            background: rgba(196, 251, 1, 0.05);
+            padding: 1rem;
+            text-align: left;
+            color: var(--primary-green);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .data-table input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            width: 100%;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+        }
+
+        .data-table input:focus {
+            outline: none;
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: var(--primary-cyan);
+            color: var(--bg-primary);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 188, 212, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--gradient-text);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 30px rgba(196, 251, 1, 0.3);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-change {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--primary-cyan);
+        }
+
+        #chartContainer {
+            width: 100%;
+            height: 300px;
+            margin-top: 2rem;
+            background: var(--chart-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* Chart section styling to match example.html */
+        .chart-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-title {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .legend {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .impressions-dot {
+            background: var(--primary-green);
+        }
+
+        .clicks-dot {
+            background: var(--primary-cyan);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .report-output {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .report-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .campaign-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .campaign-info input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            width: 100%;
+            transition: var(--transition-smooth);
+        }
+
+        .campaign-info input:focus {
+            outline: none;
+            border-color: var(--primary-cyan);
+        }
+
+        .campaign-info label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-green);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #messageArea {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .error {
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid #ff4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .success {
+            color: var(--primary-green);
+            background: rgba(196, 251, 1, 0.1);
+            border: 1px solid var(--primary-green);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Custom Checkbox Styling */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary-cyan);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            position: relative;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked + .custom-checkbox {
+            background: var(--primary-cyan);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 12px rgba(0, 188, 212, 0.4);
+        }
+
+        .custom-checkbox::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            color: var(--bg-primary);
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked + .custom-checkbox::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .checkbox-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .checkbox-wrapper:hover .checkbox-label {
+            color: var(--text-primary);
+        }
+
+        .checkbox-wrapper:hover .custom-checkbox {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 8px rgba(196, 251, 1, 0.3);
+        }
+
+        /* Insights Section */
+        .insights-section {
+            background: var(--gradient-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .insights-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .insight-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-text);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .insight-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .campaign-info {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .metric-value {
+                font-size: 2.5rem;
+            }
+
+            .chart-section {
+                padding: 2rem;
+            }
+
+            .insights-section {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-layer"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    
+    <div class="container">
+        <h1 class="youth">Personas Report Generator</h1>
+        <p class="subtitle">Generate professional performance reports from Twitter/X analytics data</p>
+
+        <!-- Step 1: Upload CSV -->
+        <div class="section upload-section">
+            <h2 class="youth">Step 1: Upload Analytics Data</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                Export your Twitter/X analytics as CSV (Account → Analytics → Export)
+            </p>
+            <input type="file" id="csvFile" class="file-input" accept=".csv">
+            <label for="csvFile" class="file-label youth">Choose CSV File</label>
+            <div id="fileInfo" style="margin-top: 1rem; color: var(--primary-cyan);"></div>
+        </div>
+
+        <!-- Step 2: Campaign Info -->
+        <div id="campaignSection" class="section hidden">
+            <h2 class="youth">Step 2: Campaign Information</h2>
+            <div class="campaign-info">
+                <div>
+                    <label for="campaignName">Campaign Name</label>
+                    <input type="text" id="campaignName" placeholder="e.g., Q1 2024 Campaign" value="Campaign Performance Analysis">
+                </div>
+                <div>
+                    <label for="campaignClient">Client/Region</label>
+                    <input type="text" id="campaignClient" placeholder="e.g., Africa, Europe" value="Global">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Review & Edit Click Data -->
+        <div id="dataSection" class="section hidden">
+            <h2 class="youth">Step 3: Review & Edit Click Data</h2>
+            <p id="dataDescription" style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Review the data below. You can edit any clicks values or upload a different clicks file:
+            </p>
+            
+            <!-- Success message when clicks are pre-loaded -->
+            <div id="clicksLoadedMessage" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: rgba(196, 251, 1, 0.1); border: 1px solid var(--primary-green); border-radius: 12px;">
+                <div>
+                    <p style="color: var(--primary-green); font-weight: 600; margin-bottom: 0.5rem;">✓ Clicks data loaded from Step 1</p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">You can edit individual values in the table below</p>
+                </div>
+            </div>
+            
+            <!-- Option to upload/replace clicks CSV -->
+            <div id="clicksUploadSection" style="text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-secondary); border-radius: 12px;">
+                <p style="margin-bottom: 1rem; font-weight: 600;">Upload clicks data CSV file</p>
+                <input type="file" id="clicksFile" class="file-input" accept=".csv">
+                <label for="clicksFile" class="file-label youth" style="font-size: 0.9rem; padding: 0.75rem 2rem;">Upload Clicks CSV</label>
+                <div id="clicksFileInfo" style="margin-top: 0.5rem; color: var(--primary-cyan); font-size: 0.9rem;"></div>
+                
+                <!-- Option to filter to common dates -->
+                <div style="margin-top: 1.5rem;">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="filterCommonDates">
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-label">Only include dates present in both files</span>
+                    </label>
+                </div>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Impressions</th>
+                        <th>Clicks (Editable)</th>
+                        <th>CTR %</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Step 4: Preview & Generate -->
+        <div id="previewSection" class="section hidden">
+            <h2 class="youth">Step 4: Report Preview</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalImpressions">-</div>
+                    <div class="metric-label">Total Impressions</div>
+                    <div class="metric-change" id="impressionChange">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalClicks">-</div>
+                    <div class="metric-label">Total Clicks</div>
+                    <div class="metric-change" id="clickChange">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgCTR">-</div>
+                    <div class="metric-label">Average CTR</div>
+                    <div class="metric-change" id="ctrBenchmark">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="campaignDays">-</div>
+                    <div class="metric-label">Days Campaign</div>
+                    <div class="metric-change">Fully autonomous</div>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h3 class="chart-title youth">Daily Performance Metrics</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-dot impressions-dot"></div>
+                            <span>Impressions</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot clicks-dot"></div>
+                            <span>Clicks</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: var(--chart-bg); border-radius: 16px; padding: 2rem; height: 350px; position: relative;">
+                    <canvas id="chartContainer"></canvas>
+                </div>
+            </section>
+
+            <div class="button-group">
+                <button id="generateAllBtn" class="btn btn-primary youth">Generate All Reports</button>
+                <button id="downloadDataBtn" class="btn btn-primary youth">Download Data CSV</button>
+                <button id="viewWebBtn" class="btn youth" style="display:none;">View Web Report</button>
+            </div>
+        </div>
+
+        <!-- Report Outputs -->
+        <div id="outputSection" class="section hidden">
+            <h2 class="youth">Generated Reports</h2>
+            <div id="outputContent"></div>
+        </div>
+
+        <div id="messageArea"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        let csvData = [];
+        let chart = null;
+        let reportData = {};
+        let updateTimer = null;
+
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing report generator...');
+            
+            const csvFileInput = document.getElementById('csvFile');
+            const clicksFileInput = document.getElementById('clicksFile');
+            const generateBtn = document.getElementById('generateAllBtn');
+            const downloadBtn = document.getElementById('downloadDataBtn');
+            
+            if (!csvFileInput) {
+                console.error('CSV file input not found!');
+                return;
+            }
+            
+            csvFileInput.addEventListener('change', handleFileSelect);
+            console.log('CSV file listener attached');
+            
+            if (clicksFileInput) {
+                clicksFileInput.addEventListener('change', handleClicksFileSelect);
+                console.log('Clicks file listener attached');
+            }
+            
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generateAllReports);
+                console.log('Generate button listener attached');
+            }
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', downloadDataCSV);
+                console.log('Download button listener attached');
+            }
+            
+            console.log('All event listeners attached successfully');
+        });
+        
+        // Fallback: Also try on window load
+        window.addEventListener('load', function() {
+            console.log('Window load event fired');
+            // Check if listeners were already attached
+            const csvFileInput = document.getElementById('csvFile');
+            if (csvFileInput && !csvFileInput.hasAttribute('data-listener-attached')) {
+                console.log('Attaching listeners via window.load fallback');
+                csvFileInput.addEventListener('change', handleFileSelect);
+                csvFileInput.setAttribute('data-listener-attached', 'true');
+            }
+        });
+
+        function showMessage(message, type = 'info') {
+            const messageArea = document.getElementById('messageArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error' : 'success';
+            messageDiv.textContent = message;
+            messageArea.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+
+        function handleFileSelect(event) {
+            console.log('File select triggered');
+            const file = event.target.files[0];
+            if (file) {
+                console.log('File selected:', file.name);
+                document.getElementById('fileInfo').textContent = `Selected: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log('File loaded, parsing CSV...');
+                    parseCSV(e.target.result);
+                };
+                reader.onerror = function(e) {
+                    console.error('Error reading file:', e);
+                    showMessage('Error reading file', 'error');
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseCSV(text) {
+            try {
+                console.log('Parsing CSV, text length:', text.length);
+                
+                if (!text || text.trim().length === 0) {
+                    showMessage('Error: CSV file is empty', 'error');
+                    return;
+                }
+                
+                const lines = text.split('\n').filter(line => line.trim().length > 0);
+                console.log('Number of non-empty lines:', lines.length);
+                
+                if (lines.length < 2) {
+                    showMessage('Error: CSV file must have headers and at least one data row', 'error');
+                    return;
+                }
+                
+                const headers = lines[0].split(',').map(h => h.trim().replace(/[﻿\uFEFF]/g, '')); // Remove BOM
+                console.log('Headers found:', headers);
+                console.log('First data line:', lines[1]);
+                
+                csvData = [];
+
+                // Check if required columns exist
+                if (!headers.includes('Date') || !headers.includes('Impressions')) {
+                    console.error('Missing required columns. Headers:', headers);
+                    showMessage(`Error: CSV must contain "Date" and "Impressions" columns. Found: ${headers.join(', ')}`, 'error');
+                    return;
+                }
+
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].match(/(".*?"|[^,]+)/g) || [];
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] ? values[index].replace(/"/g, '').trim() : '';
+                    });
+                    
+                    // Only add rows with valid date and impressions
+                    if (row.Date && row.Impressions) {
+                        csvData.push(row);
+                    }
+                }
+            }
+
+            if (csvData.length === 0) {
+                showMessage('Error: No valid data found in CSV file', 'error');
+                return;
+            }
+
+            // Sort by date (oldest first)
+            csvData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+            
+            // Show next sections
+            document.getElementById('campaignSection').classList.remove('hidden');
+            document.getElementById('dataSection').classList.remove('hidden');
+            
+            displayDataTable();
+            showMessage(`Successfully loaded ${csvData.length} rows of data`, 'success');
+            } catch (error) {
+                console.error('Error parsing CSV:', error);
+                showMessage(`Error parsing CSV: ${error.message}`, 'error');
+            }
+        }
+
+
+        function handleClicksFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                console.log('Clicks file selected:', file.name);
+                
+                document.getElementById('clicksFileInfo').textContent = `Selected: ${file.name}`;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const filterCommonDates = document.getElementById('filterCommonDates').checked;
+                    // Add a small delay to ensure the table is rendered
+                    setTimeout(() => {
+                        parseClicksCSV(e.target.result, filterCommonDates);
+                    }, 100);
+                };
+                reader.onerror = function(e) {
+                    console.error('Error reading clicks file:', e);
+                    showMessage('Error reading clicks file', 'error');
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function parseClicksCSV(text, filterToCommonDates = false) {
+            const lines = text.split('\n').filter(line => line.trim());
+            
+            // Parse CSV headers properly handling quoted values
+            const headerLine = lines[0];
+            const headers = headerLine.match(/(".*?"|[^,]+)/g).map(h => h.replace(/"/g, '').trim());
+            
+            // Find the Clicks column index
+            let clicksIndex = -1;
+            let dateIndex = -1;
+            headers.forEach((header, index) => {
+                const cleanHeader = header.toLowerCase().replace(/[﻿\uFEFF]/g, ''); // Remove BOM
+                if (cleanHeader === 'clicks') {
+                    clicksIndex = index;
+                } else if (cleanHeader === 'date') {
+                    dateIndex = index;
+                }
+            });
+            
+
+            if (clicksIndex === -1 || dateIndex === -1) {
+                showMessage(`Error: Could not find Date and Clicks columns. Found headers: ${headers.join(', ')}`, 'error');
+                return {};
+            }
+
+            // Parse clicks data
+            const clicksData = {};
+            const clicksDates = new Set();
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].match(/(".*?"|[^,]+)/g);
+                    if (values && values[dateIndex] && values[clicksIndex]) {
+                        const dateStr = values[dateIndex].replace(/"/g, '').trim();
+                        const clicks = parseInt(values[clicksIndex].replace(/"/g, '').trim()) || 0;
+                        
+                        // Try different date format parsing
+                        let parsedDate = null;
+                        
+                        // Try DD.MM.YYYY format
+                        const dateParts = dateStr.split('.');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-based
+                            let year = parseInt(dateParts[2]);
+                            
+                            // Handle 2-digit years (25 -> 2025)
+                            if (year < 100) {
+                                year = 2000 + year;
+                            }
+                            
+                            parsedDate = new Date(year, month, day);
+                        } else {
+                            // Try parsing as standard date format
+                            parsedDate = new Date(dateStr);
+                        }
+                        
+                        if (parsedDate && !isNaN(parsedDate)) {
+                            const dateKey = parsedDate.toDateString();
+                            clicksData[dateKey] = clicks;
+                            clicksDates.add(dateKey);
+                            // Also store with different date format for better matching
+                            const isoDate = parsedDate.toISOString().split('T')[0];
+                            clicksData[isoDate] = clicks;
+                            
+                            // Store with another common format
+                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            const altFormat = `${monthNames[parsedDate.getMonth()]} ${parsedDate.getDate()}, ${parsedDate.getFullYear()}`;
+                            clicksData[altFormat] = clicks;
+                            
+                            // Also store the format that matches Twitter's "Sat Jun 07 2025" (with zero-padded day)
+                            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                            const paddedDay = parsedDate.getDate().toString().padStart(2, '0');
+                            const twitterFormat = `${dayNames[parsedDate.getDay()]} ${monthNames[parsedDate.getMonth()]} ${paddedDay} ${parsedDate.getFullYear()}`;
+                            clicksData[twitterFormat] = clicks;
+                        }
+                    }
+                }
+            }
+
+            // If filtering to common dates, remove rows that don't have clicks data
+            if (filterToCommonDates) {
+                const twitterDates = new Set(csvData.map(row => new Date(row.Date).toDateString()));
+                const commonDates = new Set([...twitterDates].filter(date => clicksDates.has(date)));
+                
+                // Filter csvData to only include common dates
+                csvData = csvData.filter(row => {
+                    const dateStr = new Date(row.Date).toDateString();
+                    return commonDates.has(dateStr);
+                });
+                
+                // Redisplay the table with filtered data
+                displayDataTable();
+                
+                showMessage(`Filtered to ${csvData.length} common dates between both files.`, 'success');
+                return clicksData;
+            }
+
+            // Update the table with clicks data
+            try {
+                let appliedCount = 0;
+                const allClickDates = Object.keys(clicksData);
+                
+                csvData.forEach((row, index) => {
+                // Clean the date string (remove quotes if present)
+                const cleanDate = row.Date.replace(/"/g, '');
+                const dateObj = new Date(cleanDate);
+                const twitterDate = dateObj.toDateString();
+                const twitterISO = dateObj.toISOString().split('T')[0];
+                
+                // Also create various formats for matching
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const altFormat = `${monthNames[dateObj.getMonth()]} ${dateObj.getDate()}, ${dateObj.getFullYear()}`;
+                
+                // Create the exact format that matches the parsed clicks dates
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const paddedDay = dateObj.getDate().toString().padStart(2, '0');
+                const clicksFormat = `${dayNames[dateObj.getDay()]} ${monthNames[dateObj.getMonth()]} ${paddedDay} ${dateObj.getFullYear()}`;
+                
+                
+                // Try multiple formats to find a match
+                let clickValue = clicksData[clicksFormat] || clicksData[twitterDate] || clicksData[twitterISO] || clicksData[altFormat] || clicksData[cleanDate];
+                
+                if (clickValue !== undefined) {
+                    const clicksInput = document.getElementById(`clicks-${index}`);
+                    
+                    if (clicksInput) {
+                        clicksInput.value = clickValue;
+                        updateCTR(index, parseInt(row.Impressions) || 0);
+                        // Highlight the updated field
+                        clicksInput.style.backgroundColor = 'rgba(196, 251, 1, 0.1)';
+                        clicksInput.style.border = '1px solid var(--primary-green)';
+                        appliedCount++;
+                    }
+                }
+            });
+
+                // Force update the preview
+                setTimeout(() => {
+                    updatePreview();
+                }, 100);
+                
+                if (appliedCount > 0) {
+                    showMessage(`Clicks data imported successfully! Applied to ${appliedCount} out of ${csvData.length} dates.`, 'success');
+                } else {
+                    showMessage(`Warning: No matching dates found between Twitter data and clicks file. Please check date formats.`, 'error');
+                    console.log('Date mismatch - Twitter sample:', csvData.slice(0, 3).map(row => row.Date));
+                    console.log('Date mismatch - Clicks sample:', Object.keys(clicksData).slice(0, 3));
+                }
+                
+            } catch (error) {
+                console.error('Error applying clicks:', error);
+                showMessage(`Error applying clicks: ${error.message}`, 'error');
+            }
+            
+            return clicksData;
+        }
+
+        function displayDataTable() {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            csvData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                const date = new Date(row.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const impressions = parseInt(row.Impressions) || 0;
+
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td>${impressions.toLocaleString()}</td>
+                    <td><input type="number" id="clicks-${index}" placeholder="0" min="0" value="0"></td>
+                    <td id="ctr-${index}">0.00%</td>
+                `;
+
+                tbody.appendChild(tr);
+
+                // Add event listener to calculate CTR with debouncing
+                document.getElementById(`clicks-${index}`).addEventListener('input', function() {
+                    updateCTR(index, impressions);
+                    
+                    // Debounce the preview update to prevent chart bouncing
+                    if (updateTimer) {
+                        clearTimeout(updateTimer);
+                    }
+                    updateTimer = setTimeout(() => {
+                        updatePreview();
+                    }, 300); // Wait 300ms after user stops typing
+                });
+            });
+
+            document.getElementById('previewSection').classList.remove('hidden');
+            updatePreview();
+        }
+
+        function updateCTR(index, impressions) {
+            const clicks = parseInt(document.getElementById(`clicks-${index}`).value) || 0;
+            const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0;
+            document.getElementById(`ctr-${index}`).textContent = `${ctr}%`;
+        }
+
+
+        function updatePreview() {
+            if (csvData.length === 0) return;
+            
+            let totalImpressions = 0;
+            let totalClicks = 0;
+            const chartData = {
+                labels: [],
+                impressions: [],
+                clicks: []
+            };
+
+            csvData.forEach((row, index) => {
+                const impressions = parseInt(row.Impressions) || 0;
+                const clicksElement = document.getElementById(`clicks-${index}`);
+                const clicks = clicksElement ? (parseInt(clicksElement.value) || 0) : 0;
+                
+                totalImpressions += impressions;
+                totalClicks += clicks;
+
+                chartData.labels.push(new Date(row.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                chartData.impressions.push(impressions);
+                chartData.clicks.push(clicks);
+            });
+
+            const avgCTR = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
+            
+            // Calculate growth rate safely
+            const firstPeriod = chartData.impressions.length >= 3 ? 
+                chartData.impressions.slice(0, 3).reduce((a, b) => a + b, 0) / 3 : 
+                chartData.impressions[0] || 0;
+            const lastPeriod = chartData.impressions.length >= 3 ? 
+                chartData.impressions.slice(-3).reduce((a, b) => a + b, 0) / 3 : 
+                chartData.impressions[chartData.impressions.length - 1] || 0;
+            const growthRate = firstPeriod > 0 ? (((lastPeriod - firstPeriod) / firstPeriod) * 100).toFixed(0) : 0;
+
+            // Update metrics
+            document.getElementById('totalImpressions').textContent = totalImpressions > 999 ? 
+                `${(totalImpressions / 1000).toFixed(0)}K` : totalImpressions.toString();
+            document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+            document.getElementById('avgCTR').textContent = `${avgCTR}%`;
+            document.getElementById('campaignDays').textContent = csvData.length.toString();
+            
+            document.getElementById('impressionChange').textContent = `+${Math.abs(growthRate)}% growth`;
+            document.getElementById('clickChange').textContent = chartData.clicks.length > 0 ? 
+                `Peak: ${Math.max(...chartData.clicks)}` : 'Peak: 0';
+            // Calculate benchmark based on 0.5% to 1% range (using 0.75% as midpoint)
+            const benchmarkCTR = 0.75; // 0.75% as the midpoint of 0.5% to 1%
+            document.getElementById('ctrBenchmark').textContent = avgCTR > 0 ? 
+                `${(avgCTR / benchmarkCTR).toFixed(1)}x benchmark` : '0x benchmark';
+
+            // Store report data
+            reportData = {
+                campaignName: document.getElementById('campaignName').value || 'Campaign Performance Analysis',
+                campaignClient: document.getElementById('campaignClient').value || 'Global',
+                dateRange: chartData.labels.length > 0 ? 
+                    `${chartData.labels[0]} - ${chartData.labels[chartData.labels.length - 1]}` : 
+                    'No date range',
+                totalImpressions,
+                totalClicks,
+                avgCTR,
+                growthRate: Math.abs(growthRate),
+                chartData,
+                rawData: csvData.map((row, index) => ({
+                    date: row.Date,
+                    impressions: parseInt(row.Impressions) || 0,
+                    clicks: parseInt(document.getElementById(`clicks-${index}`)?.value) || 0
+                }))
+            };
+
+            // Update chart
+            updateChart(chartData);
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('chartContainer').getContext('2d');
+            
+            // If chart exists, update data instead of destroying
+            if (chart) {
+                chart.data.labels = data.labels;
+                chart.data.datasets[0].data = data.impressions;
+                chart.data.datasets[1].data = data.clicks;
+                chart.update('none'); // Update without animation to prevent bouncing
+                return;
+            }
+
+            // Create new chart only if it doesn't exist
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Impressions',
+                        data: data.impressions,
+                        backgroundColor: 'rgba(196, 251, 1, 0.6)',
+                        borderColor: '#c4fb01',
+                        borderWidth: 2,
+                        yAxisID: 'y-impressions',
+                        order: 2
+                    }, {
+                        label: 'Clicks',
+                        data: data.clicks,
+                        type: 'line',
+                        backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                        borderColor: '#00bcd4',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#00bcd4',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        tension: 0.4,
+                        yAxisID: 'y-clicks',
+                        order: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 750,
+                        easing: 'easeInOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Geologica'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#a0a0a0'
+                            }
+                        },
+                        'y-impressions': {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#a0a0a0',
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Impressions',
+                                color: '#c4fb01'
+                            }
+                        },
+                        'y-clicks': {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Clicks',
+                                color: '#00bcd4'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function generateAllReports() {
+            const outputSection = document.getElementById('outputSection');
+            const outputContent = document.getElementById('outputContent');
+            
+            outputSection.classList.remove('hidden');
+            outputContent.innerHTML = '<p>Generating reports... <span class="spinner"></span></p>';
+
+            // Generate web report
+            await generateWebReport();
+            
+            // Generate data CSV
+            const csvContent = generateCSVContent();
+            
+            // Generate summary
+            const summary = generateSummaryReport();
+            
+            // Display results
+            outputContent.innerHTML = `
+                <div class="report-output">
+                    <h3>✅ Reports Generated Successfully!</h3>
+                    
+                    <h4>1. Interactive Web Report (Python)</h4>
+                    <p>Generate a professional web report using the Python script:</p>
+                    <ol style="margin: 1rem 0; padding-left: 2rem; color: var(--text-secondary);">
+                        <li>Download the impressions CSV below</li>
+                        <li>Save it as 'temp_impressions.csv'</li>
+                        <li>Create a clicks file with format: ${reportData.clicksArray ? reportData.clicksArray.join(',') : 'No clicks data'}</li>
+                        <li>Run: <code style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">python generate_web_report.py temp_impressions.csv "${reportData.campaignName}"</code></li>
+                    </ol>
+                    <button onclick="downloadPythonCSV()" class="btn btn-primary youth">Download Impressions CSV</button>
+                    <button onclick="downloadClicksText()" class="btn btn-primary youth">Copy Clicks Data</button>
+                    
+                    <h4>2. Full Web Report (Direct Download)</h4>
+                    <p>Download a complete HTML report styled like index.html</p>
+                    <button onclick="downloadWebReport()" class="btn btn-primary youth">Download Full Web Report</button>
+                    <button onclick="downloadPDFReport()" class="btn btn-primary youth">Download Full PDF Report</button>
+                    <button onclick="downloadPNGReport()" class="btn btn-primary youth">Download Full PNG Report</button>
+                    
+                    <h4>3. Data Export</h4>
+                    <p>CSV file with all performance data and calculations.</p>
+                    <button onclick="downloadDataCSV()" class="btn btn-primary youth">Download Full Data CSV</button>
+                    
+                    <h4>4. Summary Report</h4>
+                    <div class="report-content">${summary}</div>
+                    <button onclick="downloadSummary()" class="btn btn-primary youth">Download Summary</button>
+                </div>
+            `;
+            
+            showMessage('All reports generated successfully!', 'success');
+        }
+
+        async function generateWebReport() {
+            // Save the data in a format for the Python script
+            const dataForPython = {
+                csv_file: 'temp_data.csv',
+                campaign_name: reportData.campaignName,
+                chart_data: reportData.chartData,
+                metrics: {
+                    total_impressions: reportData.totalImpressions,
+                    total_clicks: reportData.totalClicks,
+                    average_ctr: reportData.avgCTR,
+                    growth_rate: reportData.growthRate,
+                    date_range: reportData.dateRange
+                },
+                raw_data: reportData.rawData
+            };
+            
+            // Create CSV content for Python script
+            let csvContent = 'Date,Impressions\n';
+            reportData.rawData.forEach(row => {
+                // Format date to match Python script expectations: "Day, Mon D, YYYY"
+                const date = new Date(row.date);
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const formattedDate = days[date.getDay()] + ', ' + months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                csvContent += '"' + formattedDate + '",' + row.impressions + '\n';
+            });
+            
+            // Store the CSV and clicks data for download
+            reportData.pythonCSV = csvContent;
+            reportData.clicksArray = reportData.rawData.map(row => row.clicks);
+            
+            // Generate the HTML report using the template
+            try {
+                const webReport = await generateHTMLReport();
+                reportData.webReport = webReport;
+                showMessage('Web report generated successfully!', 'success');
+            } catch (error) {
+                console.error('Error generating web report:', error);
+                showMessage('Error generating web report: ' + error.message, 'error');
+            }
+        }
+
+        async function generateHTMLReport() {
+            // Calculate metrics
+            const peakImpDay = reportData.chartData.labels[reportData.chartData.impressions.indexOf(Math.max(...reportData.chartData.impressions))];
+            const peakClickDay = reportData.chartData.labels[reportData.chartData.clicks.indexOf(Math.max(...reportData.chartData.clicks))];
+            const dailyAvgImpressions = Math.round(reportData.totalImpressions / reportData.chartData.labels.length);
+            const dailyAvgClicks = Math.round(reportData.totalClicks / reportData.chartData.labels.length);
+            
+            // Find peak CTR
+            let peakCTR = 0;
+            let peakCTRDay = '';
+            reportData.rawData.forEach((row, idx) => {
+                if (row.impressions > 0) {
+                    const ctr = (row.clicks / row.impressions) * 100;
+                    if (ctr > peakCTR) {
+                        peakCTR = ctr;
+                        peakCTRDay = reportData.chartData.labels[idx];
+                    }
+                }
+            });
+            peakCTR = peakCTR.toFixed(2);
+            
+            // Calculate growth rates
+            const clicksGrowth = dailyAvgClicks > 0 ? Math.round((Math.max(...reportData.chartData.clicks) / dailyAvgClicks - 1) * 100) : 0;
+            const ctrGrowth = reportData.avgCTR > 0 ? Math.round((peakCTR / reportData.avgCTR - 1) * 100) : 0;
+            
+            try {
+                // Load the template
+                const response = await fetch('./report_template.html');
+                let template = await response.text();
+                
+                // Replace placeholders with actual data
+                const replacements = {
+                    '{{CAMPAIGN_NAME}}': reportData.campaignName,
+                    '{{DATE_RANGE}}': reportData.dateRange,
+                    '{{TOTAL_IMPRESSIONS}}': reportData.totalImpressions > 999 ? (reportData.totalImpressions / 1000).toFixed(0) + 'K' : reportData.totalImpressions,
+                    '{{TOTAL_CLICKS}}': reportData.totalClicks.toLocaleString(),
+                    '{{AVG_CTR}}': reportData.avgCTR,
+                    '{{GROWTH_RATE}}': reportData.growthRate,
+                    '{{CLICKS_GROWTH}}': clicksGrowth,
+                    '{{CAMPAIGN_DAYS}}': reportData.chartData.labels.length,
+                    '{{DAILY_AVG_IMPRESSIONS}}': dailyAvgImpressions.toLocaleString(),
+                    '{{DAILY_AVG_CLICKS}}': dailyAvgClicks,
+                    '{{PEAK_IMPRESSIONS}}': Math.max(...reportData.chartData.impressions).toLocaleString(),
+                    '{{PEAK_IMP_DAY}}': peakImpDay,
+                    '{{PEAK_CLICKS}}': Math.max(...reportData.chartData.clicks),
+                    '{{PEAK_CLICK_DAY}}': peakClickDay,
+                    '{{PEAK_CTR}}': peakCTR,
+                    '{{PEAK_CTR_DAY}}': peakCTRDay,
+                    '{{CTR_GROWTH}}': ctrGrowth,
+                    '{{CTR_PERFORMANCE}}': reportData.avgCTR >= 0.75 ? 'outperformed' : 'matched',
+                    '{{CTR_BENCHMARK}}': (reportData.avgCTR / 0.75).toFixed(1),
+                    '{{CHART_DATA}}': JSON.stringify({
+                        labels: reportData.chartData.labels,
+                        impressions: reportData.chartData.impressions,
+                        clicks: reportData.chartData.clicks
+                    })
+                };
+                
+                // Apply all replacements
+                for (const [placeholder, value] of Object.entries(replacements)) {
+                    template = template.replace(new RegExp(placeholder, 'g'), value);
+                }
+                
+                return template;
+            } catch (error) {
+                console.error('Error loading template:', error);
+                // Fallback to simple HTML
+                return '<!DOCTYPE html>' +
+                    '<html><head><title>' + reportData.campaignName + ' - Report</title></head>' +
+                    '<body style="font-family: Arial, sans-serif; background: #0a0a0a; color: white; padding: 20px;">' +
+                    '<h1>' + reportData.campaignName + '</h1>' +
+                    '<h2>Performance Summary</h2>' +
+                    '<p>Total Impressions: ' + reportData.totalImpressions + '</p>' +
+                    '<p>Total Clicks: ' + reportData.totalClicks + '</p>' +
+                    '<p>Average CTR: ' + reportData.avgCTR + '%</p>' +
+                    '<p>Campaign Duration: ' + reportData.chartData.labels.length + ' days</p>' +
+                    '</body></html>';
+            }
+        }
+        // Additional helper functions can be added here
+        function generateCSVContent() {
+            if (csvData.length === 0) {
+                return '';
+            }
+            
+            let csvContent = 'Date,Impressions,Clicks,CTR\n';
+            csvData.forEach((row, index) => {
+                const clicks = document.getElementById('clicks-' + index)?.value || 0;
+                const impressions = parseInt(row.Impressions) || 0;
+                const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0;
+                csvContent += '"' + row.Date + '",' + impressions + ',' + clicks + ',' + ctr + '%\n';
+            });
+            
+            return csvContent;
+        }
+
+                // PDF/PNG Export Functions
+        window.downloadPDFReport = function() {
+            showMessage('Generating PDF, please wait...', 'success');
+            // Create a hidden iframe to render the HTML report
+            let iframe = document.createElement('iframe');
+            iframe.style.width = '1200px';
+            iframe.style.height = '1800px';
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-9999px';
+            document.body.appendChild(iframe);
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(reportData.webReport);
+            iframe.contentDocument.close();
+            iframe.onload = function() {
+                // Add export-mode class to logo for white text
+                const logo = iframe.contentDocument.querySelector('.logo');
+                if (logo) {
+                    logo.classList.add('export-mode');
+                }
+                
+                // Add export-mode class to container to hide footer
+                const container = iframe.contentDocument.querySelector('.container');
+                if (container) {
+                    container.classList.add('export-mode-container');
+                }
+                
+                // Wait for chart to render
+                setTimeout(() => {
+                    html2canvas(iframe.contentDocument.body, {
+                        backgroundColor: null, 
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true
+                    }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new window.jspdf.jsPDF({orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height]});
+                    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                    pdf.save(reportData.campaignName.replace(/\s+/g, '_') + '_web_report.pdf');
+                    document.body.removeChild(iframe);
+                        showMessage('PDF generated successfully!', 'success');
+                }).catch(err => {
+                    showMessage('PDF export failed: ' + err, 'error');
+                    document.body.removeChild(iframe);
+                });
+                }, 2000); // Wait 2 seconds for chart to render
+            };
+        };
+
+                window.downloadPNGReport = function() {
+            showMessage('Generating PNG, please wait...', 'success');
+            let iframe = document.createElement('iframe');
+            iframe.style.width = '1200px';
+            iframe.style.height = '1800px';
+            iframe.style.position = 'fixed';
+            iframe.style.left = '-9999px';
+            document.body.appendChild(iframe);
+            iframe.contentDocument.open();
+            iframe.contentDocument.write(reportData.webReport);
+            iframe.contentDocument.close();
+            iframe.onload = function() {
+                // Add export-mode class to logo for white text
+                const logo = iframe.contentDocument.querySelector('.logo');
+                if (logo) {
+                    logo.classList.add('export-mode');
+                }
+                
+                // Add export-mode class to container to hide footer
+                const container = iframe.contentDocument.querySelector('.container');
+                if (container) {
+                    container.classList.add('export-mode-container');
+                }
+                
+                // Wait for chart to render
+                setTimeout(() => {
+                    html2canvas(iframe.contentDocument.body, {
+                        backgroundColor: null, 
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true
+                    }).then(canvas => {
+                    canvas.toBlob(function(blob) {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = reportData.campaignName.replace(/\s+/g, '_') + '_web_report.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        a.remove();
+                        document.body.removeChild(iframe);
+                            showMessage('PNG generated successfully!', 'success');
+                    }, 'image/png');
+                }).catch(err => {
+                    showMessage('PNG export failed: ' + err, 'error');
+                    document.body.removeChild(iframe);
+                });
+                }, 2000); // Wait 2 seconds for chart to render
+            };
+        };
+        function downloadWebReport() {
+            if (!reportData.webReport) {
+                showMessage('Please generate the report first', 'error');
+                return;
+            }
+            
+            const blob = new Blob([reportData.webReport], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = reportData.campaignName.replace(/\s+/g, '_') + '_web_report.html';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+
+        function downloadPythonCSV() {
+            if (!reportData.pythonCSV) {
+                showMessage('Please generate the report first', 'error');
+                return;
+            }
+            
+            const blob = new Blob([reportData.pythonCSV], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'temp_impressions.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+
+        function downloadClicksText() {
+            if (!reportData.clicksArray) {
+                showMessage('Please generate the report first', 'error');
+                return;
+            }
+            
+            const clicksText = reportData.clicksArray.join(',');
+            navigator.clipboard.writeText(clicksText).then(() => {
+                showMessage('Clicks data copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = clicksText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage('Clicks data copied to clipboard!', 'success');
+            });
+        }
+
+        function downloadDataCSV() {
+            if (csvData.length === 0) {
+                showMessage('No data to download', 'error');
+                return;
+            }
+            
+            let csvContent = 'Date,Impressions,Clicks,CTR\n';
+            csvData.forEach((row, index) => {
+                const clicks = document.getElementById('clicks-' + index)?.value || 0;
+                const impressions = parseInt(row.Impressions) || 0;
+                const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0;
+                csvContent += '"' + row.Date + '",' + impressions + ',' + clicks + ',' + ctr + '%\n';
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'performance_data.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+
+        function generateSummaryReport() {
+            if (!reportData.campaignName) {
+                return 'No report data available';
+            }
+            
+            return 'CAMPAIGN PERFORMANCE SUMMARY\n' +
+                '=====================================\n\n' +
+                'Campaign: ' + reportData.campaignName + '\n' +
+                'Client/Region: ' + reportData.campaignClient + '\n' +
+                'Period: ' + reportData.dateRange + '\n' +
+                'Duration: ' + (reportData.chartData?.labels?.length || 0) + ' days\n\n' +
+                'KEY METRICS\n' +
+                '-----------\n' +
+                'Total Impressions: ' + (reportData.totalImpressions?.toLocaleString() || 0) + '\n' +
+                'Total Clicks: ' + (reportData.totalClicks?.toLocaleString() || 0) + '\n' +
+                'Average CTR: ' + (reportData.avgCTR || 0) + '%\n' +
+                'Growth Rate: +' + (reportData.growthRate || 0) + '%\n\n' +
+                'PERFORMANCE HIGHLIGHTS\n' +
+                '----------------------\n' +
+                '• Achieved ' + (reportData.avgCTR || 0) + '% average CTR (industry benchmark: 0.5-1%)\n' +
+                '• Generated ' + (reportData.totalClicks?.toLocaleString() || 0) + ' total clicks\n' +
+                '• Maintained ' + (reportData.growthRate || 0) + '% growth rate over campaign period\n' +
+                '• Fully autonomous AI agent deployment\n\n' +
+                'RECOMMENDATIONS\n' +
+                '---------------\n' +
+                '• Continue current optimization strategies\n' +
+                '• Scale successful campaign elements\n' +
+                '• Monitor performance metrics daily\n' +
+                '• Consider expanding to additional markets\n\n' +
+                'Generated on: ' + new Date().toLocaleDateString() + '\n' +
+                'Report Generator: Personas AI Agent Suite';
+        }
+
+        function downloadSummary() {
+            const summary = generateSummaryReport();
+            const blob = new Blob([summary], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = reportData.campaignName.replace(/\s+/g, '_') + '_summary.txt';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+    </script>
+</body>
+</html>
