@@ -256,6 +256,34 @@
             border-color: var(--primary-cyan);
             box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.1);
         }
+        
+        /* General input styling */
+        input[type="text"], input[type="number"] {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            width: 100%;
+            transition: var(--transition-smooth);
+            font-family: inherit;
+            font-size: 1rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(196, 251, 1, 0.1);
+            background: var(--bg-secondary);
+        }
+        
+        input[type="text"]::placeholder, input[type="number"]::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
 
         .button-group {
             display: flex;
@@ -670,23 +698,30 @@
         <!-- Step 2: Campaign Info -->
         <div id="campaignSection" class="section hidden">
             <h2 class="youth">Step 2: Campaign Information</h2>
-            <div class="campaign-info">
-                <div>
-                    <label for="campaignName">Campaign Name</label>
-                    <input type="text" id="campaignName" placeholder="e.g., Q1 2024 Campaign" value="Campaign Performance Analysis">
-                </div>
-                <div>
-                    <label for="campaignClient">Client/Region</label>
-                    <input type="text" id="campaignClient" placeholder="e.g., Africa, Europe" value="Global">
-                </div>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <label for="campaignName">Campaign Name</label>
+                <input type="text" id="campaignName" placeholder="e.g., Q1 2024 Campaign" value="Campaign Performance Analysis" style="width: 100%;">
             </div>
         </div>
 
         <!-- Step 3: Review & Edit Click Data -->
         <div id="dataSection" class="section hidden">
             <h2 class="youth">Step 3: Review & Edit Click Data</h2>
+            
+            <!-- Main checkbox to indicate if user has clicks file -->
+            <div style="text-align: center; margin-bottom: 2rem; padding: 2rem; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border-color);">
+                <label class="checkbox-wrapper" style="font-size: 1.1rem;">
+                    <input type="checkbox" id="hasClicksFile">
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-label" style="font-weight: 600; color: var(--text-primary);">I have clicks data (file or manual entry)</span>
+                </label>
+                <p id="clicksHelperText" style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    Check this box if you want to include clicks data from a CSV file or enter them manually in the table.
+                </p>
+            </div>
+            
             <p id="dataDescription" style="color: var(--text-secondary); margin-bottom: 1rem;">
-                Review the data below. You can edit any clicks values or upload a different clicks file:
+                Review the data below. You can edit any clicks values in the table:
             </p>
             
             <!-- Success message when clicks are pre-loaded -->
@@ -697,17 +732,17 @@
                 </div>
             </div>
             
-            <!-- Option to upload/replace clicks CSV -->
-            <div id="clicksUploadSection" style="text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-secondary); border-radius: 12px;">
+            <!-- Option to upload/replace clicks CSV - Initially hidden -->
+            <div id="clicksUploadSection" style="display: none; text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-secondary); border-radius: 12px; transition: all 0.3s ease;">
                 <p style="margin-bottom: 1rem; font-weight: 600;">Upload clicks data CSV file</p>
                 <input type="file" id="clicksFile" class="file-input" accept=".csv">
                 <label for="clicksFile" class="file-label youth" style="font-size: 0.9rem; padding: 0.75rem 2rem;">Upload Clicks CSV</label>
                 <div id="clicksFileInfo" style="margin-top: 0.5rem; color: var(--primary-cyan); font-size: 0.9rem;"></div>
                 
-                <!-- Option to filter to common dates -->
+                <!-- Option to filter to common dates - Initially disabled -->
                 <div style="margin-top: 1.5rem;">
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="filterCommonDates">
+                    <label class="checkbox-wrapper" id="filterCommonDatesWrapper" style="opacity: 0.5; pointer-events: none;">
+                        <input type="checkbox" id="filterCommonDates" disabled>
                         <span class="custom-checkbox"></span>
                         <span class="checkbox-label">Only include dates present in both files</span>
                     </label>
@@ -808,6 +843,7 @@
             const clicksFileInput = document.getElementById('clicksFile');
             const generateBtn = document.getElementById('generateAllBtn');
             const downloadBtn = document.getElementById('downloadDataBtn');
+            const hasClicksFileCheckbox = document.getElementById('hasClicksFile');
             
             if (!csvFileInput) {
                 console.error('CSV file input not found!');
@@ -832,6 +868,29 @@
                 console.log('Download button listener attached');
             }
             
+            if (hasClicksFileCheckbox) {
+                hasClicksFileCheckbox.addEventListener('change', handleHasClicksFileChange);
+                console.log('Has clicks file checkbox listener attached');
+            }
+            
+            // Add listener for filter common dates checkbox
+            const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
+            if (filterCommonDatesCheckbox) {
+                filterCommonDatesCheckbox.addEventListener('change', function() {
+                    // Re-read the clicks file with the new filter setting
+                    const clicksFileInput = document.getElementById('clicksFile');
+                    if (clicksFileInput.files.length > 0) {
+                        const file = clicksFileInput.files[0];
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            parseClicksCSV(e.target.result, filterCommonDatesCheckbox.checked);
+                        };
+                        reader.readAsText(file);
+                    }
+                });
+                console.log('Filter common dates checkbox listener attached');
+            }
+            
             console.log('All event listeners attached successfully');
         });
         
@@ -854,6 +913,58 @@
             messageDiv.textContent = message;
             messageArea.appendChild(messageDiv);
             setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+        function handleHasClicksFileChange(event) {
+            const hasClicksFile = event.target.checked;
+            const clicksUploadSection = document.getElementById('clicksUploadSection');
+            const filterCommonDatesWrapper = document.getElementById('filterCommonDatesWrapper');
+            const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
+            const clicksHelperText = document.getElementById('clicksHelperText');
+            const dataDescription = document.getElementById('dataDescription');
+            
+            if (hasClicksFile) {
+                // Show clicks upload section
+                clicksUploadSection.style.display = 'block';
+                clicksHelperText.textContent = 'Upload your clicks CSV file below or enter clicks manually in the table. You can also filter data to common dates.';
+                dataDescription.textContent = 'Review the data below. You can upload a clicks file or edit values manually:';
+                
+                // Enable filter common dates only when a clicks file is actually selected
+                const clicksFileInput = document.getElementById('clicksFile');
+                if (clicksFileInput.files.length > 0) {
+                    filterCommonDatesWrapper.style.opacity = '1';
+                    filterCommonDatesWrapper.style.pointerEvents = 'auto';
+                    filterCommonDatesCheckbox.disabled = false;
+                }
+            } else {
+                // Hide clicks upload section
+                clicksUploadSection.style.display = 'none';
+                clicksHelperText.textContent = 'Check this box if you want to include clicks data from a CSV file or enter them manually in the table.';
+                dataDescription.textContent = 'Review your impressions data below:';
+                
+                // Disable and reset filter common dates
+                filterCommonDatesWrapper.style.opacity = '0.5';
+                filterCommonDatesWrapper.style.pointerEvents = 'none';
+                filterCommonDatesCheckbox.disabled = true;
+                filterCommonDatesCheckbox.checked = false;
+                
+                // Clear any uploaded clicks file
+                const clicksFileInput = document.getElementById('clicksFile');
+                clicksFileInput.value = '';
+                document.getElementById('clicksFileInfo').textContent = '';
+                
+                // Clear all clicks values in the table
+                csvData.forEach((row, index) => {
+                    const clicksInput = document.getElementById(`clicks-${index}`);
+                    if (clicksInput) {
+                        clicksInput.value = '0';
+                        updateCTR(index, parseInt(row.Impressions) || 0);
+                    }
+                });
+            }
+            
+            // Redisplay the table to show/hide clicks column
+            displayDataTable();
         }
 
 
@@ -933,6 +1044,12 @@
             document.getElementById('campaignSection').classList.remove('hidden');
             document.getElementById('dataSection').classList.remove('hidden');
             
+            // Initialize the checkbox to unchecked state
+            const hasClicksCheckbox = document.getElementById('hasClicksFile');
+            if (hasClicksCheckbox) {
+                hasClicksCheckbox.checked = false;
+            }
+            
             displayDataTable();
             showMessage(`Successfully loaded ${csvData.length} rows of data`, 'success');
             } catch (error) {
@@ -948,6 +1065,14 @@
                 console.log('Clicks file selected:', file.name);
                 
                 document.getElementById('clicksFileInfo').textContent = `Selected: ${file.name}`;
+                
+                // Enable the filter common dates checkbox now that a file is selected
+                const filterCommonDatesWrapper = document.getElementById('filterCommonDatesWrapper');
+                const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
+                filterCommonDatesWrapper.style.opacity = '1';
+                filterCommonDatesWrapper.style.pointerEvents = 'auto';
+                filterCommonDatesCheckbox.disabled = false;
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const filterCommonDates = document.getElementById('filterCommonDates').checked;
@@ -961,6 +1086,14 @@
                     showMessage('Error reading clicks file', 'error');
                 };
                 reader.readAsText(file);
+            } else {
+                // No file selected, disable the filter checkbox
+                const filterCommonDatesWrapper = document.getElementById('filterCommonDatesWrapper');
+                const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
+                filterCommonDatesWrapper.style.opacity = '0.5';
+                filterCommonDatesWrapper.style.pointerEvents = 'none';
+                filterCommonDatesCheckbox.disabled = true;
+                document.getElementById('clicksFileInfo').textContent = '';
             }
         }
 
@@ -1124,6 +1257,25 @@
 
         function displayDataTable() {
             const tbody = document.getElementById('dataTableBody');
+            const thead = document.querySelector('.data-table thead tr');
+            const hasClicksCheckbox = document.getElementById('hasClicksFile');
+            const hasClicksData = hasClicksCheckbox ? hasClicksCheckbox.checked : false;
+            
+            // Update table headers based on whether clicks are shown
+            if (hasClicksData) {
+                thead.innerHTML = `
+                    <th>Date</th>
+                    <th>Impressions</th>
+                    <th>Clicks (Editable)</th>
+                    <th>CTR %</th>
+                `;
+            } else {
+                thead.innerHTML = `
+                    <th>Date</th>
+                    <th>Impressions</th>
+                `;
+            }
+            
             tbody.innerHTML = '';
 
             csvData.forEach((row, index) => {
@@ -1131,27 +1283,39 @@
                 const date = new Date(row.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 const impressions = parseInt(row.Impressions) || 0;
 
-                tr.innerHTML = `
-                    <td>${date}</td>
-                    <td>${impressions.toLocaleString()}</td>
-                    <td><input type="number" id="clicks-${index}" placeholder="0" min="0" value="0"></td>
-                    <td id="ctr-${index}">0.00%</td>
-                `;
+                if (hasClicksData) {
+                    tr.innerHTML = `
+                        <td>${date}</td>
+                        <td>${impressions.toLocaleString()}</td>
+                        <td><input type="number" id="clicks-${index}" placeholder="0" min="0" value="0"></td>
+                        <td id="ctr-${index}">0.00%</td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td>${date}</td>
+                        <td>${impressions.toLocaleString()}</td>
+                    `;
+                }
 
                 tbody.appendChild(tr);
 
-                // Add event listener to calculate CTR with debouncing
-                document.getElementById(`clicks-${index}`).addEventListener('input', function() {
-                    updateCTR(index, impressions);
-                    
-                    // Debounce the preview update to prevent chart bouncing
-                    if (updateTimer) {
-                        clearTimeout(updateTimer);
+                // Only add event listener if clicks column is shown
+                if (hasClicksData) {
+                    const clicksInput = document.getElementById(`clicks-${index}`);
+                    if (clicksInput) {
+                        clicksInput.addEventListener('input', function() {
+                            updateCTR(index, impressions);
+                            
+                            // Debounce the preview update to prevent chart bouncing
+                            if (updateTimer) {
+                                clearTimeout(updateTimer);
+                            }
+                            updateTimer = setTimeout(() => {
+                                updatePreview();
+                            }, 300); // Wait 300ms after user stops typing
+                        });
                     }
-                    updateTimer = setTimeout(() => {
-                        updatePreview();
-                    }, 300); // Wait 300ms after user stops typing
-                });
+                }
             });
 
             document.getElementById('previewSection').classList.remove('hidden');
@@ -1168,6 +1332,9 @@
         function updatePreview() {
             if (csvData.length === 0) return;
             
+            const hasClicksCheckbox = document.getElementById('hasClicksFile');
+            const hasClicksData = hasClicksCheckbox ? hasClicksCheckbox.checked : false;
+            
             let totalImpressions = 0;
             let totalClicks = 0;
             const chartData = {
@@ -1178,8 +1345,12 @@
 
             csvData.forEach((row, index) => {
                 const impressions = parseInt(row.Impressions) || 0;
-                const clicksElement = document.getElementById(`clicks-${index}`);
-                const clicks = clicksElement ? (parseInt(clicksElement.value) || 0) : 0;
+                let clicks = 0;
+                
+                if (hasClicksData) {
+                    const clicksElement = document.getElementById(`clicks-${index}`);
+                    clicks = clicksElement ? (parseInt(clicksElement.value) || 0) : 0;
+                }
                 
                 totalImpressions += impressions;
                 totalClicks += clicks;
@@ -1189,7 +1360,7 @@
                 chartData.clicks.push(clicks);
             });
 
-            const avgCTR = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
+            const avgCTR = (hasClicksData && totalImpressions > 0) ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
             
             // Calculate growth rate safely
             const firstPeriod = chartData.impressions.length >= 3 ? 
@@ -1203,22 +1374,32 @@
             // Update metrics
             document.getElementById('totalImpressions').textContent = totalImpressions > 999 ? 
                 `${(totalImpressions / 1000).toFixed(0)}K` : totalImpressions.toString();
-            document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
-            document.getElementById('avgCTR').textContent = `${avgCTR}%`;
             document.getElementById('campaignDays').textContent = csvData.length.toString();
-            
             document.getElementById('impressionChange').textContent = `+${Math.abs(growthRate)}% growth`;
-            document.getElementById('clickChange').textContent = chartData.clicks.length > 0 ? 
-                `Peak: ${Math.max(...chartData.clicks)}` : 'Peak: 0';
-            // Calculate benchmark based on 0.5% to 1% range (using 0.75% as midpoint)
-            const benchmarkCTR = 0.75; // 0.75% as the midpoint of 0.5% to 1%
-            document.getElementById('ctrBenchmark').textContent = avgCTR > 0 ? 
-                `${(avgCTR / benchmarkCTR).toFixed(1)}x benchmark` : '0x benchmark';
+            
+            // Update clicks-related metrics only if clicks data is enabled
+            if (hasClicksData) {
+                document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
+                document.getElementById('avgCTR').textContent = `${avgCTR}%`;
+                document.getElementById('clickChange').textContent = chartData.clicks.length > 0 ? 
+                    `Peak: ${Math.max(...chartData.clicks)}` : 'Peak: 0';
+                // Calculate benchmark based on 0.5% to 1% range (using 0.75% as midpoint)
+                const benchmarkCTR = 0.75; // 0.75% as the midpoint of 0.5% to 1%
+                document.getElementById('ctrBenchmark').textContent = avgCTR > 0 ? 
+                    `${(avgCTR / benchmarkCTR).toFixed(1)}x benchmark` : '0x benchmark';
+                
+                // Show clicks-related metric cards
+                document.querySelector('.metric-card:nth-child(2)').style.display = 'block'; // Total Clicks
+                document.querySelector('.metric-card:nth-child(3)').style.display = 'block'; // Average CTR
+            } else {
+                // Hide clicks-related metric cards
+                document.querySelector('.metric-card:nth-child(2)').style.display = 'none'; // Total Clicks
+                document.querySelector('.metric-card:nth-child(3)').style.display = 'none'; // Average CTR
+            }
 
             // Store report data
             reportData = {
                 campaignName: document.getElementById('campaignName').value || 'Campaign Performance Analysis',
-                campaignClient: document.getElementById('campaignClient').value || 'Global',
                 dateRange: chartData.labels.length > 0 ? 
                     `${chartData.labels[0]} - ${chartData.labels[chartData.labels.length - 1]}` : 
                     'No date range',
@@ -1235,49 +1416,69 @@
             };
 
             // Update chart
-            updateChart(chartData);
+            updateChart(chartData, hasClicksData);
+            
+            // Update legend visibility based on clicks data
+            const clicksLegend = document.querySelector('.legend-item:nth-child(2)');
+            if (clicksLegend) {
+                clicksLegend.style.display = hasClicksData ? 'flex' : 'none';
+            }
         }
 
-        function updateChart(data) {
+        function updateChart(data, showClicks = true) {
             const ctx = document.getElementById('chartContainer').getContext('2d');
             
             // If chart exists, update data instead of destroying
-            if (chart) {
+            if (chart && chart.data.datasets.length === (showClicks ? 2 : 1)) {
                 chart.data.labels = data.labels;
                 chart.data.datasets[0].data = data.impressions;
-                chart.data.datasets[1].data = data.clicks;
+                if (showClicks && chart.data.datasets[1]) {
+                    chart.data.datasets[1].data = data.clicks;
+                }
                 chart.update('none'); // Update without animation to prevent bouncing
                 return;
             }
+            
+            // Destroy and recreate if dataset structure changes
+            if (chart) {
+                chart.destroy();
+            }
 
-            // Create new chart only if it doesn't exist
+            // Create datasets array
+            const datasets = [{
+                label: 'Impressions',
+                data: data.impressions,
+                backgroundColor: 'rgba(196, 251, 1, 0.6)',
+                borderColor: '#c4fb01',
+                borderWidth: 2,
+                yAxisID: 'y-impressions',
+                order: 2
+            }];
+            
+            if (showClicks) {
+                datasets.push({
+                    label: 'Clicks',
+                    data: data.clicks,
+                    type: 'line',
+                    backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                    borderColor: '#00bcd4',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#00bcd4',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    tension: 0.4,
+                    yAxisID: 'y-clicks',
+                    order: 1
+                });
+            }
+
+            // Create new chart
             chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: data.labels,
-                    datasets: [{
-                        label: 'Impressions',
-                        data: data.impressions,
-                        backgroundColor: 'rgba(196, 251, 1, 0.6)',
-                        borderColor: '#c4fb01',
-                        borderWidth: 2,
-                        yAxisID: 'y-impressions',
-                        order: 2
-                    }, {
-                        label: 'Clicks',
-                        data: data.clicks,
-                        type: 'line',
-                        backgroundColor: 'rgba(0, 188, 212, 0.2)',
-                        borderColor: '#00bcd4',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#00bcd4',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6,
-                        tension: 0.4,
-                        yAxisID: 'y-clicks',
-                        order: 1
-                    }]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
@@ -1330,7 +1531,7 @@
                         },
                         'y-clicks': {
                             type: 'linear',
-                            display: true,
+                            display: showClicks,
                             position: 'right',
                             grid: {
                                 drawOnChartArea: false
@@ -1375,14 +1576,14 @@
                     <ol style="margin: 1rem 0; padding-left: 2rem; color: var(--text-secondary);">
                         <li>Download the impressions CSV below</li>
                         <li>Save it as 'temp_impressions.csv'</li>
-                        <li>Create a clicks file with format: ${reportData.clicksArray ? reportData.clicksArray.join(',') : 'No clicks data'}</li>
+                        ${reportData.totalClicks > 0 ? '<li>Create a clicks file with format: ' + (reportData.clicksArray ? reportData.clicksArray.join(',') : 'No clicks data') + '</li>' : ''}
                         <li>Run: <code style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">python generate_web_report.py temp_impressions.csv "${reportData.campaignName}"</code></li>
                     </ol>
                     <button onclick="downloadPythonCSV()" class="btn btn-primary youth">Download Impressions CSV</button>
-                    <button onclick="downloadClicksText()" class="btn btn-primary youth">Copy Clicks Data</button>
+                    ${reportData.totalClicks > 0 ? '<button onclick="downloadClicksText()" class="btn btn-primary youth">Copy Clicks Data</button>' : ''}
                     
                     <h4>2. Full Web Report (Direct Download)</h4>
-                    <p>Download a complete HTML report styled like index.html</p>
+                    <p>Download a complete HTML report ${reportData.totalClicks > 0 ? 'with impressions and clicks data' : '(impressions-only version)'}</p>
                     <button onclick="downloadWebReport()" class="btn btn-primary youth">Download Full Web Report</button>
                     <button onclick="downloadPDFReport()" class="btn btn-primary youth">Download Full PDF Report</button>
                     <button onclick="downloadPNGReport()" class="btn btn-primary youth">Download Full PNG Report</button>
@@ -1443,62 +1644,81 @@
         }
 
         async function generateHTMLReport() {
+            // Check if user has clicks data
+            const hasClicksData = reportData.totalClicks > 0 || 
+                reportData.chartData.clicks.some(click => click > 0);
+            
             // Calculate metrics
             const peakImpDay = reportData.chartData.labels[reportData.chartData.impressions.indexOf(Math.max(...reportData.chartData.impressions))];
-            const peakClickDay = reportData.chartData.labels[reportData.chartData.clicks.indexOf(Math.max(...reportData.chartData.clicks))];
             const dailyAvgImpressions = Math.round(reportData.totalImpressions / reportData.chartData.labels.length);
-            const dailyAvgClicks = Math.round(reportData.totalClicks / reportData.chartData.labels.length);
             
-            // Find peak CTR
-            let peakCTR = 0;
-            let peakCTRDay = '';
-            reportData.rawData.forEach((row, idx) => {
-                if (row.impressions > 0) {
-                    const ctr = (row.clicks / row.impressions) * 100;
-                    if (ctr > peakCTR) {
-                        peakCTR = ctr;
-                        peakCTRDay = reportData.chartData.labels[idx];
+            let peakClickDay, dailyAvgClicks, peakCTR, peakCTRDay, clicksGrowth, ctrGrowth;
+            
+            if (hasClicksData) {
+                peakClickDay = reportData.chartData.labels[reportData.chartData.clicks.indexOf(Math.max(...reportData.chartData.clicks))];
+                dailyAvgClicks = Math.round(reportData.totalClicks / reportData.chartData.labels.length);
+                
+                // Find peak CTR
+                peakCTR = 0;
+                peakCTRDay = '';
+                reportData.rawData.forEach((row, idx) => {
+                    if (row.impressions > 0) {
+                        const ctr = (row.clicks / row.impressions) * 100;
+                        if (ctr > peakCTR) {
+                            peakCTR = ctr;
+                            peakCTRDay = reportData.chartData.labels[idx];
+                        }
                     }
-                }
-            });
-            peakCTR = peakCTR.toFixed(2);
-            
-            // Calculate growth rates
-            const clicksGrowth = dailyAvgClicks > 0 ? Math.round((Math.max(...reportData.chartData.clicks) / dailyAvgClicks - 1) * 100) : 0;
-            const ctrGrowth = reportData.avgCTR > 0 ? Math.round((peakCTR / reportData.avgCTR - 1) * 100) : 0;
+                });
+                peakCTR = peakCTR.toFixed(2);
+                
+                // Calculate growth rates
+                clicksGrowth = dailyAvgClicks > 0 ? Math.round((Math.max(...reportData.chartData.clicks) / dailyAvgClicks - 1) * 100) : 0;
+                ctrGrowth = reportData.avgCTR > 0 ? Math.round((peakCTR / reportData.avgCTR - 1) * 100) : 0;
+            }
             
             try {
-                // Load the template
-                const response = await fetch('./report_template.html');
+                // Load the appropriate template
+                const templateFile = hasClicksData ? './report_template.html' : './report_template_impressions_only.html';
+                const response = await fetch(templateFile);
                 let template = await response.text();
                 
                 // Replace placeholders with actual data
-                const replacements = {
+                let replacements = {
                     '{{CAMPAIGN_NAME}}': reportData.campaignName,
                     '{{DATE_RANGE}}': reportData.dateRange,
                     '{{TOTAL_IMPRESSIONS}}': reportData.totalImpressions > 999 ? (reportData.totalImpressions / 1000).toFixed(0) + 'K' : reportData.totalImpressions,
-                    '{{TOTAL_CLICKS}}': reportData.totalClicks.toLocaleString(),
-                    '{{AVG_CTR}}': reportData.avgCTR,
                     '{{GROWTH_RATE}}': reportData.growthRate,
-                    '{{CLICKS_GROWTH}}': clicksGrowth,
                     '{{CAMPAIGN_DAYS}}': reportData.chartData.labels.length,
                     '{{DAILY_AVG_IMPRESSIONS}}': dailyAvgImpressions.toLocaleString(),
-                    '{{DAILY_AVG_CLICKS}}': dailyAvgClicks,
                     '{{PEAK_IMPRESSIONS}}': Math.max(...reportData.chartData.impressions).toLocaleString(),
                     '{{PEAK_IMP_DAY}}': peakImpDay,
-                    '{{PEAK_CLICKS}}': Math.max(...reportData.chartData.clicks),
-                    '{{PEAK_CLICK_DAY}}': peakClickDay,
-                    '{{PEAK_CTR}}': peakCTR,
-                    '{{PEAK_CTR_DAY}}': peakCTRDay,
-                    '{{CTR_GROWTH}}': ctrGrowth,
-                    '{{CTR_PERFORMANCE}}': reportData.avgCTR >= 0.75 ? 'outperformed' : 'matched',
-                    '{{CTR_BENCHMARK}}': (reportData.avgCTR / 0.75).toFixed(1),
                     '{{CHART_DATA}}': JSON.stringify({
                         labels: reportData.chartData.labels,
                         impressions: reportData.chartData.impressions,
                         clicks: reportData.chartData.clicks
                     })
                 };
+                
+                // Add clicks-specific replacements if there's clicks data
+                if (hasClicksData) {
+                    Object.assign(replacements, {
+                        '{{TOTAL_CLICKS}}': reportData.totalClicks.toLocaleString(),
+                        '{{AVG_CTR}}': reportData.avgCTR,
+                        '{{CLICKS_GROWTH}}': clicksGrowth,
+                        '{{DAILY_AVG_CLICKS}}': dailyAvgClicks,
+                        '{{PEAK_CLICKS}}': Math.max(...reportData.chartData.clicks),
+                        '{{PEAK_CLICK_DAY}}': peakClickDay,
+                        '{{PEAK_CTR}}': peakCTR,
+                        '{{PEAK_CTR_DAY}}': peakCTRDay,
+                        '{{CTR_GROWTH}}': ctrGrowth,
+                        '{{CTR_PERFORMANCE}}': reportData.avgCTR >= 0.75 ? 'outperformed' : 'matched',
+                        '{{CTR_BENCHMARK}}': (reportData.avgCTR / 0.75).toFixed(1),
+                        '{{CTR_BENCHMARK_TEXT}}': 'Industry benchmark: 0.5-1%',
+                        '{{INSIGHT_GROWTH_TEXT}}': `The AI agent achieved a ${reportData.growthRate}% growth in impressions within ${reportData.chartData.labels.length} days, demonstrating rapid market adaptation and optimization capabilities.`,
+                        '{{INSIGHT_CTR_TEXT}}': `With an average CTR of ${reportData.avgCTR}%, our agent ${reportData.avgCTR >= 0.75 ? 'outperformed' : 'matched'} industry benchmarks by ${(reportData.avgCTR / 0.75).toFixed(1)}x, showcasing advanced targeting precision.`
+                    });
+                }
                 
                 // Apply all replacements
                 for (const [placeholder, value] of Object.entries(replacements)) {
@@ -1552,6 +1772,9 @@
             iframe.contentDocument.write(reportData.webReport);
             iframe.contentDocument.close();
             iframe.onload = function() {
+                // Add export-mode class to body to hide background elements
+                iframe.contentDocument.body.classList.add('export-mode');
+                
                 // Add export-mode class to logo for white text
                 const logo = iframe.contentDocument.querySelector('.logo');
                 if (logo) {
@@ -1598,6 +1821,9 @@
             iframe.contentDocument.write(reportData.webReport);
             iframe.contentDocument.close();
             iframe.onload = function() {
+                // Add export-mode class to body to hide background elements
+                iframe.contentDocument.body.classList.add('export-mode');
+                
                 // Add export-mode class to logo for white text
                 const logo = iframe.contentDocument.querySelector('.logo');
                 if (logo) {
@@ -1722,23 +1948,36 @@
                 return 'No report data available';
             }
             
-            return 'CAMPAIGN PERFORMANCE SUMMARY\n' +
+            const hasClicksData = reportData.totalClicks > 0 || 
+                (reportData.chartData?.clicks && reportData.chartData.clicks.some(click => click > 0));
+            
+            let summary = 'CAMPAIGN PERFORMANCE SUMMARY\n' +
                 '=====================================\n\n' +
                 'Campaign: ' + reportData.campaignName + '\n' +
-                'Client/Region: ' + reportData.campaignClient + '\n' +
                 'Period: ' + reportData.dateRange + '\n' +
                 'Duration: ' + (reportData.chartData?.labels?.length || 0) + ' days\n\n' +
                 'KEY METRICS\n' +
                 '-----------\n' +
-                'Total Impressions: ' + (reportData.totalImpressions?.toLocaleString() || 0) + '\n' +
-                'Total Clicks: ' + (reportData.totalClicks?.toLocaleString() || 0) + '\n' +
-                'Average CTR: ' + (reportData.avgCTR || 0) + '%\n' +
-                'Growth Rate: +' + (reportData.growthRate || 0) + '%\n\n' +
+                'Total Impressions: ' + (reportData.totalImpressions?.toLocaleString() || 0) + '\n';
+            
+            if (hasClicksData) {
+                summary += 'Total Clicks: ' + (reportData.totalClicks?.toLocaleString() || 0) + '\n' +
+                    'Average CTR: ' + (reportData.avgCTR || 0) + '%\n';
+            }
+            
+            summary += 'Growth Rate: +' + (reportData.growthRate || 0) + '%\n\n' +
                 'PERFORMANCE HIGHLIGHTS\n' +
-                '----------------------\n' +
-                '• Achieved ' + (reportData.avgCTR || 0) + '% average CTR (industry benchmark: 0.5-1%)\n' +
-                '• Generated ' + (reportData.totalClicks?.toLocaleString() || 0) + ' total clicks\n' +
-                '• Maintained ' + (reportData.growthRate || 0) + '% growth rate over campaign period\n' +
+                '----------------------\n';
+            
+            if (hasClicksData) {
+                summary += '• Achieved ' + (reportData.avgCTR || 0) + '% average CTR (industry benchmark: 0.5-1%)\n' +
+                    '• Generated ' + (reportData.totalClicks?.toLocaleString() || 0) + ' total clicks\n';
+            } else {
+                summary += '• Reached ' + (reportData.totalImpressions?.toLocaleString() || 0) + ' total impressions\n' +
+                    '• Daily average of ' + Math.round(reportData.totalImpressions / reportData.chartData.labels.length).toLocaleString() + ' impressions\n';
+            }
+            
+            summary += '• Maintained ' + (reportData.growthRate || 0) + '% growth rate over campaign period\n' +
                 '• Fully autonomous AI agent deployment\n\n' +
                 'RECOMMENDATIONS\n' +
                 '---------------\n' +
@@ -1748,6 +1987,8 @@
                 '• Consider expanding to additional markets\n\n' +
                 'Generated on: ' + new Date().toLocaleDateString() + '\n' +
                 'Report Generator: Personas AI Agent Suite';
+            
+            return summary;
         }
 
         function downloadSummary() {

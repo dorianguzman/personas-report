@@ -421,6 +421,11 @@
             line-height: 1.8;
         }
 
+        .insight-text strong {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -501,7 +506,7 @@
             <div class="metric-card">
                 <div class="metric-value">{{AVG_CTR}}%</div>
                 <div class="metric-label">Average CTR</div>
-                <div class="metric-change">Industry benchmark: 0.5-1%</div>
+                <div class="metric-change">{{CTR_BENCHMARK_TEXT}}</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value">{{CAMPAIGN_DAYS}}</div>
@@ -573,12 +578,12 @@
                 <div class="insight-card">
                     <div class="insight-icon">🚀</div>
                     <h3 class="insight-title">Explosive Growth</h3>
-                    <p class="insight-text">The AI agent achieved a {{GROWTH_RATE}}% growth in impressions within {{CAMPAIGN_DAYS}} days, demonstrating rapid market adaptation and optimization capabilities.</p>
+                    <p class="insight-text">{{INSIGHT_GROWTH_TEXT}}</p>
                 </div>
                 <div class="insight-card">
                     <div class="insight-icon">🎯</div>
                     <h3 class="insight-title">Superior CTR Performance</h3>
-                    <p class="insight-text">With an average CTR of {{AVG_CTR}}%, our agent {{CTR_PERFORMANCE}} industry benchmarks by {{CTR_BENCHMARK}}x, showcasing advanced targeting precision.</p>
+                    <p class="insight-text">{{INSIGHT_CTR_TEXT}}</p>
                 </div>
                 <div class="insight-card">
                     <div class="insight-icon">🤖</div>

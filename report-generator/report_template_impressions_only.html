@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{CAMPAIGN_NAME}} - Personas Impressions Report</title>
+    <meta name="description" content="Data-driven impressions report from our AI Agent deployment. Real performance metrics and insights from autonomous marketing campaigns.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'Youth';
+            src: url("/assets/Youth-Light.woff2") format('woff2'),
+                 url("/assets/Youth-Light.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'Youth';
+            src: url("/assets/Youth-Medium.woff2") format('woff2'),
+                 url("/assets/Youth-Medium.otf") format("opentype");
+            font-weight: bold;
+        }
+
+        :root {
+            --primary-green: #c4fb01;
+            --primary-cyan: #00bcd4;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --bg-card-hover: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(196, 251, 1, 0.3);
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-elevated: 0 20px 60px rgba(196, 251, 1, 0.1);
+            --gradient-primary: linear-gradient(135deg, rgba(196, 251, 1, 0.15) 0%, rgba(0, 188, 212, 0.1) 100%);
+            --gradient-text: linear-gradient(135deg, #c4fb01 0%, #00bcd4 100%);
+            --chart-bg: #292929;
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            font-family: 'Geologica', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .youth {
+            font-family: 'Youth', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Enhanced background with parallax effect */
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .background-layer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%23c4fb01' fill-opacity='0.02' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: backgroundFloat 20s ease-in-out infinite;
+        }
+
+        .background-layer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(196, 251, 1, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(0, 188, 212, 0.02) 0%, transparent 50%);
+            animation: floatingOrbs 30s ease-in-out infinite;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.5deg); }
+        }
+
+        @keyframes floatingOrbs {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-20px, -20px) scale(1.1); }
+            50% { transform: translate(20px, -10px) scale(0.9); }
+            75% { transform: translate(-10px, 20px) scale(1.05); }
+        }
+
+        /* Animated gradient glow effects */
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            z-index: -1;
+            animation: glowFloat 10s ease-in-out infinite;
+        }
+
+        .glow-1 {
+            background: var(--primary-green);
+            top: 20%;
+            left: 10%;
+        }
+
+        .glow-2 {
+            background: var(--primary-cyan);
+            bottom: 20%;
+            right: 10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes glowFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.2); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 2rem 0;
+        }
+
+        .report-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .date-range {
+            font-size: 1.2rem;
+            color: var(--primary-green);
+            margin-bottom: 2rem;
+        }
+
+        .campaign-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .info-card:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        /* Key Metrics - Impressions focused */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin: 4rem 0;
+        }
+
+        .metric-card {
+            background: var(--gradient-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(196, 251, 1, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-elevated);
+            border-color: var(--primary-green);
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-value {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-text);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.875rem;
+            color: var(--primary-cyan);
+            font-weight: 500;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 4rem 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-text);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--chart-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #chartContainer {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Insights Section - Impressions focused */
+        .insights-section {
+            background: var(--gradient-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 4rem 0;
+        }
+
+        .insights-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .insight-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-text);
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .insight-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .insight-text strong {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 4rem 0 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        .footer-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .footer-tagline {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .footer-logo {
+            max-width: 200px;
+            height: auto;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-logo:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 2rem 0;
+            }
+            
+            .report-title {
+                font-size: 2rem;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .chart-section {
+                padding: 2rem;
+            }
+
+            .insights-section {
+                padding: 2rem;
+            }
+            
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Override for PDF/PNG export */
+        @media print {
+            .background-layer,
+            .glow,
+            .glow-1,
+            .glow-2 {
+                display: none !important;
+            }
+            
+            .footer {
+                display: none !important;
+            }
+            
+            body {
+                background: var(--bg-primary) !important;
+            }
+            
+            /* Fix gradient text for print */
+            .metric-value {
+                background: none !important;
+                -webkit-background-clip: unset !important;
+                -webkit-text-fill-color: unset !important;
+                background-clip: unset !important;
+                color: var(--primary-green) !important;
+            }
+        }
+        
+        /* For html2canvas (PNG export) */
+        body.export-mode .background-layer,
+        body.export-mode .glow,
+        body.export-mode .glow-1,
+        body.export-mode .glow-2,
+        .container.export-mode-container .background-layer,
+        .container.export-mode-container .glow,
+        .container.export-mode-container .glow-1,
+        .container.export-mode-container .glow-2 {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        /* Hide footer in PNG exports too */
+        body.export-mode .footer,
+        .container.export-mode-container .footer {
+            display: none !important;
+        }
+        
+        /* Fix gradient text for PNG export */
+        body.export-mode .metric-value,
+        .container.export-mode-container .metric-value {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            background-clip: unset !important;
+            color: var(--primary-green) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-layer"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="report-title">{{CAMPAIGN_NAME}}</h1>
+            <p class="subtitle">Impressions Performance Report</p>
+            <p class="date-range youth">{{DATE_RANGE}}</p>
+        </header>
+
+        <!-- Key Metrics - Impressions focused -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">{{TOTAL_IMPRESSIONS}}</div>
+                <div class="metric-label">Total Impressions</div>
+                <div class="metric-change">{{GROWTH_RATE}}% growth rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{CAMPAIGN_DAYS}}</div>
+                <div class="metric-label">Campaign Days</div>
+                <div class="metric-change">Fully autonomous</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{DAILY_AVG_IMPRESSIONS}}</div>
+                <div class="metric-label">Daily Average</div>
+                <div class="metric-change">Impressions per day</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{PEAK_IMPRESSIONS}}</div>
+                <div class="metric-label">Peak Impressions</div>
+                <div class="metric-change">{{PEAK_IMP_DAY}}</div>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="chart-section">
+            <div class="chart-header">
+                <h3 class="chart-title youth">Daily Impressions Performance</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartContainer"></canvas>
+            </div>
+        </section>
+
+        <!-- Performance Analysis -->
+        <section class="insights-section">
+            <h2 class="insights-title youth">Performance Analysis</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">📈</div>
+                    <h3 class="insight-title">Growth Trajectory</h3>
+                    <p class="insight-text">
+                        Campaign achieved <strong>{{GROWTH_RATE}}% growth</strong> in impressions, 
+                        demonstrating strong audience reach expansion throughout the campaign period.
+                    </p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🎯</div>
+                    <h3 class="insight-title">Reach Consistency</h3>
+                    <p class="insight-text">
+                        With an average of <strong>{{DAILY_AVG_IMPRESSIONS}} daily impressions</strong>, 
+                        the campaign maintained consistent visibility and audience engagement.
+                    </p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">⚡</div>
+                    <h3 class="insight-title">Peak Performance</h3>
+                    <p class="insight-text">
+                        Reached <strong>{{PEAK_IMPRESSIONS}} impressions</strong> on {{PEAK_IMP_DAY}}, 
+                        showcasing the campaign's ability to capture significant audience attention.
+                    </p>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🤖</div>
+                    <h3 class="insight-title">AI-Driven Optimization</h3>
+                    <p class="insight-text">
+                        Our autonomous agents continuously optimized content delivery, resulting in 
+                        sustained impression growth without manual intervention.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-brand"><span class="youth">Personas</span> AI Performance Report</p>
+            <p class="footer-tagline">Powered by autonomous AI agents delivering measurable results</p>
+            <svg class="footer-logo" xmlns="http://www.w3.org/2000/svg" width="236" height="44" viewBox="0 0 236 44" fill="none">
+                <path d="M161.583 34.9776C158.255 34.9776 157.141 33.7515 157.141 30.4192V9.01063H161.85V30.7022H170.139V34.9619H161.583V34.9776Z" fill="white"/>
+                <path d="M188.617 23.9904C188.617 19.9507 185.697 16.9799 181.804 16.9799C177.91 16.9799 175.022 19.9507 175.022 23.9904C175.022 28.03 177.942 31.0322 181.804 31.0322C185.697 31.048 188.617 28.0772 188.617 23.9904ZM188.507 13.176H192.95V34.9776H188.507V32.164C186.984 34.1602 184.441 35.4334 181.364 35.4334C175.147 35.4334 170.296 30.655 170.296 24.0847C170.296 17.5143 175.147 12.7359 181.364 12.7359C184.284 12.7359 186.843 13.8834 188.507 15.9582V13.176Z" fill="white"/>
+                <path d="M214.159 23.9904C214.159 19.9507 211.239 16.9799 207.377 16.9799C203.515 16.9799 200.564 19.9507 200.564 23.9904C200.564 28.03 203.484 31.0322 207.377 31.0322C211.239 31.048 214.159 28.0772 214.159 23.9904ZM218.9 24.0689C218.9 30.6393 214.081 35.4177 207.864 35.4177C204.756 35.4177 202.197 34.1602 200.674 32.1168V34.9776H196.262V9.01063H200.894V15.7224C202.479 13.8676 204.96 12.7202 207.848 12.7202C214.097 12.7202 218.9 17.5458 218.9 24.0689Z" fill="white"/>
+                <path d="M220.376 28.4387H224.929C225.117 30.4349 226.483 31.6295 228.257 31.6295C230.031 31.6295 231.224 30.5607 231.224 29.1146C231.224 27.2284 229.811 26.7097 226.483 25.8137C223.155 24.8863 220.596 22.9215 220.596 19.1333C220.596 15.3452 223.563 12.7202 227.959 12.7202C232.354 12.7202 235.149 15.2352 235.479 19.3534H230.926C230.816 17.5301 229.56 16.4612 227.959 16.4612C226.248 16.4612 225.149 17.5301 225.149 18.8347C225.149 20.5009 226.216 21.0667 229.623 22.0255C233.029 22.9844 235.73 25.0592 235.73 28.7373C235.73 32.8556 232.731 35.4177 228.21 35.4177C223.689 35.4177 220.643 32.8241 220.376 28.4387Z" fill="white"/>
+                <path d="M70.6077 30.8908C65.7096 30.8908 61.7221 26.8983 61.7221 21.9941C61.7221 17.0899 65.7096 13.0974 70.6077 13.0974C75.5058 13.0974 79.4934 17.0899 79.4934 21.9941C79.4934 23.9118 78.8811 25.688 77.845 27.1498L75.8826 25.185H70.1367L74.7837 29.8376C73.5434 30.4978 72.1148 30.8908 70.6077 30.8908ZM85.6787 34.9776L81.0789 30.3721C82.9157 28.0772 84.0147 25.1535 84.0147 21.9941C84.0147 14.575 78.0176 8.57051 70.6077 8.57051C63.1978 8.57051 57.2008 14.575 57.2008 21.9941C57.2008 29.4132 63.1978 35.4177 70.6077 35.4177C73.3707 35.4177 75.9454 34.5846 78.0804 33.1385L79.9172 34.9776H85.6787Z" fill="white"/>
+                <path d="M114.879 30.8908C112.728 30.8908 111.802 30.6393 111.802 28.4858L111.833 18.9133H114.973V14.8422H111.833V9.08922H107.249V28.5487C107.249 33.6729 110.106 34.9619 114.172 34.9619H115.177V30.8908H114.879Z" fill="white"/>
+                <path d="M134.864 23.9904C134.864 19.9507 131.944 16.9799 128.05 16.9799C124.157 16.9799 121.268 19.9507 121.268 23.9904C121.268 28.03 124.188 31.0322 128.05 31.0322C131.928 31.048 134.864 28.0772 134.864 23.9904ZM134.754 13.176H139.197V34.9776H134.754V32.164C133.231 34.1602 130.688 35.4334 127.611 35.4334C121.394 35.4334 116.543 30.655 116.543 24.0847C116.543 17.5143 121.394 12.7359 127.611 12.7359C130.531 12.7359 133.09 13.8834 134.754 15.9582V13.176Z" fill="white"/>
+                <path d="M153.812 12.9403V17.4986H153.546C150.327 17.4986 147.109 18.6775 147.109 24.9177V34.9619H142.525V13.176H146.889V16.3983C148.192 14.1663 150.547 12.956 153.624 12.956H153.812V12.9403Z" fill="white"/>
+                <path d="M87.1545 27.1183H91.8956C92.1624 29.9005 93.8579 31.378 96.15 31.378C98.442 31.378 99.745 29.9634 99.745 28.0772C99.745 25.5936 98.1124 24.7448 94.376 23.6603C90.5611 22.5914 87.5312 20.5009 87.5312 16.0525C87.5312 11.6042 90.8594 8.57051 95.7889 8.57051C100.718 8.57051 103.78 11.4313 104.188 16.3197H99.4782C99.2898 13.9148 97.7356 12.6102 95.7732 12.6102C93.8108 12.6102 92.288 13.9148 92.288 15.7224C92.288 17.9545 93.7637 18.6932 97.3588 19.7935C101.205 20.941 104.549 23.4245 104.549 27.6528C104.549 32.5098 101.142 35.402 96.1029 35.402C90.8908 35.4177 87.5155 32.3369 87.1545 27.1183Z" fill="white"/>
+                <path d="M22.2548 2.73895L24.1701 14.2135L36.6194 5.37966C28.3617 -1.80369 16.0537 -1.78797 7.79605 5.39538L20.1041 14.1034L22.2548 2.73895Z" fill="white"/>
+                <path d="M41.4704 21.9312L30.0572 24.0218L38.8487 36.408C45.9917 28.1715 46.0231 15.8953 38.9115 7.64312L30.2927 20.0765L41.4704 21.9312Z" fill="white"/>
+                <path d="M3.00786 21.9941L14.0913 20.1236L5.53539 7.69028C-1.51345 15.9425 -1.48206 28.1558 5.61389 36.3765L14.3111 24.0689L3.00786 21.9941Z" fill="white"/>
+                <path d="M44.2177 44L24.123 30.1677L22.2391 41.0449L22.2077 41.2021L20.2297 30.2306L7.90594 38.6871C12.0191 42.2238 17.137 44 22.2391 44H44.2177Z" fill="white"/>
+            </svg>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart data from report generator
+        const chartData = {{CHART_DATA}};
+        
+        // Create impressions-only chart
+        const ctx = document.getElementById('chartContainer').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Impressions',
+                    data: chartData.impressions,
+                    borderColor: '#c4fb01',
+                    backgroundColor: 'rgba(196, 251, 1, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#c4fb01',
+                    pointBorderColor: '#0a0a0a',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#c4fb01',
+                        bodyColor: '#ffffff',
+                        borderColor: '#c4fb01',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Impressions: ' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#a0a0a0'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#a0a0a0',
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Impressions',
+                            color: '#c4fb01'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
