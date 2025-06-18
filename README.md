@@ -18,20 +18,21 @@ Upload your Twitter/X analytics CSV and generate a professional performance repo
 
 ```
 personas-report/
-├── report-generator/           # 🎯 Report Generator Tool
-│   ├── report_generator.html   #    Main application interface
-│   ├── report_template.html    #    Template for generated reports
-│   ├── assets/                 #    Fonts and styling resources
-│   │   ├── Youth-Light.otf     #    Custom Personas fonts
-│   │   ├── Youth-Medium.otf    #    (OTF & WOFF2 formats)
-│   │   ├── ModernGothic-*.otf  #    Alternative typography
-│   │   └── *.woff2            #    Web-optimized fonts
-│   └── README.md              #    Generator documentation
-├── assets/                     # 🎨 Shared brand assets (fonts)
-├── Example_*.html             # 📊 Sample generated reports
-├── Example_*.pdf              # 📄 Export format examples
-├── Example_*.png              # 🖼️ Preview images
-└── README.md                  # 📖 Main documentation
+├── report-generator/                    # 🎯 Report Generator Tool
+│   ├── report_generator.html            #    Main application interface
+│   ├── report_template.html             #    Full report template (impressions + clicks)
+│   ├── report_template_impressions_only.html  #    Impressions-only template
+│   ├── assets/                          #    Fonts and styling resources
+│   │   ├── Youth-Light.otf              #    Custom Personas fonts
+│   │   ├── Youth-Medium.otf             #    (OTF & WOFF2 formats)
+│   │   ├── ModernGothic-*.otf           #    Alternative typography
+│   │   └── *.woff2                      #    Web-optimized fonts
+│   └── README.md                        #    Generator documentation
+├── assets/                              # 🎨 Shared brand assets (fonts)
+├── Example_*.html                       # 📊 Sample generated reports
+├── Example_*.pdf                        # 📄 Export format examples
+├── Example_*.png                        # 🖼️ Preview images
+└── README.md                            # 📖 Main documentation
 ```
 
 ## 🚀 Quick Start
@@ -48,6 +49,9 @@ personas-report/
 - **🎨 Beautiful Design** - Animated backgrounds, glass-morphism effects
 - **⚡ Zero Installation** - Pure HTML/CSS/JavaScript, runs in browser
 - **📱 Mobile Responsive** - Works on all devices
+- **🔄 Adaptive Reports** - Automatic template selection based on available data
+- **✅ Optional Clicks Data** - Checkbox to enable/disable clicks UI
+- **📐 Optimized Layouts** - 4-column metrics grid, clean PDF/PNG exports
 
 ## 🎨 Design System
 
@@ -63,13 +67,15 @@ personas-report/
 ## 🔧 Technical Features
 
 **Zero Installation:** Pure HTML/CSS/JavaScript • Runs in browser • Works offline • Cross-platform  
-**Export Optimized:** Web (full interactivity) • PDF/PNG (print-ready) • Embedded fonts • Responsive layouts
+**Export Optimized:** Web (full interactivity) • PDF/PNG (print-ready) • Clean backgrounds • No artifacts  
+**Smart Features:** Dynamic content placeholders • Conditional rendering • Adaptive summaries • Template switching
 
 ## 📊 Data Requirements
 
 **Required:** CSV with `Date` and `Impressions` columns  
-**Optional:** `Clicks`, `Engagements`, `Profile_Visits`  
-**Formats:** Multiple date formats supported • Manual or CSV click entry • Built-in validation
+**Optional:** Check "I have clicks data" to enable clicks UI  
+**Click Entry:** Manual table editing • Separate CSV upload • Filter to common dates  
+**Formats:** Multiple date formats supported • Built-in validation • Adaptive UI
 
 ## 🎯 Use Cases
 
