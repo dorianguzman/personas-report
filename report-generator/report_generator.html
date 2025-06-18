@@ -1656,9 +1656,9 @@
                     <p>Generate a professional web report using the Python script:</p>
                     <ol style="margin: 1rem 0; padding-left: 2rem; color: var(--text-secondary);">
                         <li>Download the impressions CSV below</li>
-                        <li>Save it as 'temp_impressions.csv'</li>
+                        <li>The file will be named: ${reportData.campaignName.replace(/\s+/g, '_')}_impressions.csv</li>
                         ${reportData.totalClicks > 0 ? '<li>Create a clicks file with format: ' + (reportData.clicksArray ? reportData.clicksArray.join(',') : 'No clicks data') + '</li>' : ''}
-                        <li>Run: <code style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">python generate_web_report.py temp_impressions.csv "${reportData.campaignName}"</code></li>
+                        <li>Run: <code style="background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">python generate_web_report.py ${reportData.campaignName.replace(/\s+/g, '_')}_impressions.csv "${reportData.campaignName}"</code></li>
                     </ol>
                     <button onclick="downloadPythonCSV()" class="btn btn-primary youth">Download Impressions CSV</button>
                     ${reportData.totalClicks > 0 ? '<button onclick="downloadClicksText()" class="btn btn-primary youth">Copy Clicks Data</button>' : ''}
@@ -2017,7 +2017,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'performance_data.csv';
+            a.download = reportData.campaignName.replace(/\s+/g, '_') + '_data.csv';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
