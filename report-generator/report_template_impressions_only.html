@@ -55,6 +55,7 @@
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
         }
 
         .youth {
@@ -144,6 +145,9 @@
             padding: 2rem;
             position: relative;
             z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Header */
@@ -151,6 +155,29 @@
             text-align: center;
             margin-bottom: 4rem;
             padding: 2rem 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c4fb01 0%, #00bcd4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+            /* Fallback for browsers that don't support background-clip */
+            color: #c4fb01;
+        }
+
+        /* For html2canvas (PNG export) - detect when being captured */
+        .logo.export-mode {
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: unset;
+            background-clip: unset;
+            color: #ffffff !important;
         }
 
         .report-title {
@@ -326,6 +353,47 @@
             height: 100%;
         }
 
+        /* Summary Table */
+        .summary-section {
+            margin-bottom: 4rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-table {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-table th {
+            background: rgba(196, 251, 1, 0.05);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            color: var(--primary-green);
+        }
+
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .summary-table td {
+            font-size: 1.1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
         /* Insights Section - Impressions focused */
         .insights-section {
             background: var(--gradient-primary);
@@ -339,7 +407,7 @@
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 2rem;
-            text-align: center;
+            text-align: left;
         }
 
         .insights-grid {
@@ -388,7 +456,7 @@
             padding: 4rem 0 2rem;
             text-align: center;
             border-top: 1px solid var(--border-color);
-            margin-top: 4rem;
+            margin-top: auto;
         }
 
         .footer-brand {
@@ -453,6 +521,14 @@
 
         /* Override for PDF/PNG export */
         @media print {
+            .logo {
+                background: none;
+                -webkit-background-clip: unset;
+                -webkit-text-fill-color: unset;
+                background-clip: unset;
+                color: #ffffff !important;
+            }
+            
             .background-layer,
             .glow,
             .glow-1,
@@ -498,6 +574,25 @@
             display: none !important;
         }
         
+        /* Export mode styles to fill the page */
+        body.export-mode {
+            background: var(--bg-primary) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            min-height: 100vh !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        .export-mode .container {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            padding-bottom: 3rem !important;
+            min-height: 100vh !important;
+        }
+        
         /* Fix gradient text for PNG export */
         body.export-mode .metric-value,
         .container.export-mode-container .metric-value {
@@ -517,8 +612,9 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
+            <div class="logo youth" data-text="Personas">Personas</div>
+            <p class="subtitle">AI Agent Performance Report</p>
             <h1 class="report-title">{{CAMPAIGN_NAME}}</h1>
-            <p class="subtitle">Impressions Performance Report</p>
             <p class="date-range youth">{{DATE_RANGE}}</p>
         </header>
 
@@ -556,43 +652,27 @@
             </div>
         </section>
 
-        <!-- Performance Analysis -->
-        <section class="insights-section">
-            <h2 class="insights-title youth">Performance Analysis</h2>
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-icon">📈</div>
-                    <h3 class="insight-title">Growth Trajectory</h3>
-                    <p class="insight-text">
-                        Campaign achieved <strong>{{GROWTH_RATE}}% growth</strong> in impressions, 
-                        demonstrating strong audience reach expansion throughout the campaign period.
-                    </p>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-icon">🎯</div>
-                    <h3 class="insight-title">Reach Consistency</h3>
-                    <p class="insight-text">
-                        With an average of <strong>{{DAILY_AVG_IMPRESSIONS}} daily impressions</strong>, 
-                        the campaign maintained consistent visibility and audience engagement.
-                    </p>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-icon">⚡</div>
-                    <h3 class="insight-title">Peak Performance</h3>
-                    <p class="insight-text">
-                        Reached <strong>{{PEAK_IMPRESSIONS}} impressions</strong> on {{PEAK_IMP_DAY}}, 
-                        showcasing the campaign's ability to capture significant audience attention.
-                    </p>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-icon">🤖</div>
-                    <h3 class="insight-title">AI-Driven Optimization</h3>
-                    <p class="insight-text">
-                        Our autonomous agents continuously optimized content delivery, resulting in 
-                        sustained impression growth without manual intervention.
-                    </p>
-                </div>
-            </div>
+        <!-- Key Insights & Achievements -->
+        <section class="summary-section">
+            <h2 class="insights-title youth">Key Insights & Achievements</h2>
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Daily Average</th>
+                        <th>Peak Performance</th>
+                        <th>Growth Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Impressions</td>
+                        <td>{{DAILY_AVG_IMPRESSIONS}}</td>
+                        <td>{{PEAK_IMPRESSIONS}} ({{PEAK_IMP_DAY}})</td>
+                        <td>+{{GROWTH_RATE}}%</td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
 
         <!-- Footer -->

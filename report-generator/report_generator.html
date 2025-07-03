@@ -757,14 +757,6 @@
                 <label for="clicksFile" class="file-label youth" style="font-size: 0.9rem; padding: 0.75rem 2rem;">Upload Clicks CSV</label>
                 <div id="clicksFileInfo" style="margin-top: 0.5rem; color: var(--primary-cyan); font-size: 0.9rem;"></div>
                 
-                <!-- Option to filter to common dates - Initially disabled -->
-                <div style="margin-top: 1.5rem;">
-                    <label class="checkbox-wrapper" id="filterCommonDatesWrapper" style="opacity: 0.5; pointer-events: none;">
-                        <input type="checkbox" id="filterCommonDates" disabled>
-                        <span class="custom-checkbox"></span>
-                        <span class="checkbox-label">Only include dates present in both files</span>
-                    </label>
-                </div>
             </div>
             
             <table class="data-table">
@@ -784,6 +776,7 @@
         <!-- Step 4: Preview & Generate -->
         <div id="previewSection" class="section hidden">
             <h2 class="youth">Step 4: Report Preview</h2>
+            <h3 id="previewCampaignName" style="text-align: center; color: var(--primary-cyan); margin-bottom: 2rem;">Campaign Performance Analysis</h3>
             
             <div class="metrics-grid">
                 <div class="metric-card">
@@ -881,6 +874,18 @@
                 console.log('Generate button listener attached');
             }
             
+            // Add campaign name change listener
+            const campaignNameInput = document.getElementById('campaignName');
+            if (campaignNameInput) {
+                campaignNameInput.addEventListener('input', function() {
+                    // Update the preview if data is already loaded
+                    if (csvData && csvData.length > 0) {
+                        updatePreview();
+                    }
+                });
+                console.log('Campaign name listener attached');
+            }
+            
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', downloadDataCSV);
                 console.log('Download button listener attached');
@@ -891,23 +896,6 @@
                 console.log('Has clicks file checkbox listener attached');
             }
             
-            // Add listener for filter common dates checkbox
-            const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
-            if (filterCommonDatesCheckbox) {
-                filterCommonDatesCheckbox.addEventListener('change', function() {
-                    // Re-read the clicks file with the new filter setting
-                    const clicksFileInput = document.getElementById('clicksFile');
-                    if (clicksFileInput.files.length > 0) {
-                        const file = clicksFileInput.files[0];
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            parseClicksCSV(e.target.result, filterCommonDatesCheckbox.checked);
-                        };
-                        reader.readAsText(file);
-                    }
-                });
-                console.log('Filter common dates checkbox listener attached');
-            }
             
             console.log('All event listeners attached successfully');
         });
@@ -936,35 +924,19 @@
         function handleHasClicksFileChange(event) {
             const hasClicksFile = event.target.checked;
             const clicksUploadSection = document.getElementById('clicksUploadSection');
-            const filterCommonDatesWrapper = document.getElementById('filterCommonDatesWrapper');
-            const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
             const clicksHelperText = document.getElementById('clicksHelperText');
             const dataDescription = document.getElementById('dataDescription');
             
             if (hasClicksFile) {
                 // Show clicks upload section
                 clicksUploadSection.style.display = 'block';
-                clicksHelperText.textContent = 'Upload your clicks CSV file below or enter clicks manually in the table. You can also filter data to common dates.';
+                clicksHelperText.textContent = 'Upload your clicks CSV file below or enter clicks manually in the table.';
                 dataDescription.textContent = 'Review the data below. You can upload a clicks file or edit values manually:';
-                
-                // Enable filter common dates only when a clicks file is actually selected
-                const clicksFileInput = document.getElementById('clicksFile');
-                if (clicksFileInput.files.length > 0) {
-                    filterCommonDatesWrapper.style.opacity = '1';
-                    filterCommonDatesWrapper.style.pointerEvents = 'auto';
-                    filterCommonDatesCheckbox.disabled = false;
-                }
             } else {
                 // Hide clicks upload section
                 clicksUploadSection.style.display = 'none';
                 clicksHelperText.textContent = 'Check this box if you want to include clicks data from a CSV file or enter them manually in the table.';
                 dataDescription.textContent = 'Review your impressions data below:';
-                
-                // Disable and reset filter common dates
-                filterCommonDatesWrapper.style.opacity = '0.5';
-                filterCommonDatesWrapper.style.pointerEvents = 'none';
-                filterCommonDatesCheckbox.disabled = true;
-                filterCommonDatesCheckbox.checked = false;
                 
                 // Clear any uploaded clicks file
                 const clicksFileInput = document.getElementById('clicksFile');
@@ -1084,19 +1056,11 @@
                 
                 document.getElementById('clicksFileInfo').textContent = `Selected: ${file.name}`;
                 
-                // Enable the filter common dates checkbox now that a file is selected
-                const filterCommonDatesWrapper = document.getElementById('filterCommonDatesWrapper');
-                const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
-                filterCommonDatesWrapper.style.opacity = '1';
-                filterCommonDatesWrapper.style.pointerEvents = 'auto';
-                filterCommonDatesCheckbox.disabled = false;
-                
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const filterCommonDates = document.getElementById('filterCommonDates').checked;
                     // Add a small delay to ensure the table is rendered
                     setTimeout(() => {
-                        parseClicksCSV(e.target.result, filterCommonDates);
+                        parseClicksCSV(e.target.result);
                     }, 100);
                 };
                 reader.onerror = function(e) {
@@ -1105,17 +1069,12 @@
                 };
                 reader.readAsText(file);
             } else {
-                // No file selected, disable the filter checkbox
-                const filterCommonDatesWrapper = document.getElementById('filterCommonDatesWrapper');
-                const filterCommonDatesCheckbox = document.getElementById('filterCommonDates');
-                filterCommonDatesWrapper.style.opacity = '0.5';
-                filterCommonDatesWrapper.style.pointerEvents = 'none';
-                filterCommonDatesCheckbox.disabled = true;
+                // No file selected
                 document.getElementById('clicksFileInfo').textContent = '';
             }
         }
 
-        function parseClicksCSV(text, filterToCommonDates = false) {
+        function parseClicksCSV(text) {
             const lines = text.split('\n').filter(line => line.trim());
             
             // Parse CSV headers properly handling quoted values
@@ -1195,23 +1154,6 @@
                 }
             }
 
-            // If filtering to common dates, remove rows that don't have clicks data
-            if (filterToCommonDates) {
-                const twitterDates = new Set(csvData.map(row => new Date(row.Date).toDateString()));
-                const commonDates = new Set([...twitterDates].filter(date => clicksDates.has(date)));
-                
-                // Filter csvData to only include common dates
-                csvData = csvData.filter(row => {
-                    const dateStr = new Date(row.Date).toDateString();
-                    return commonDates.has(dateStr);
-                });
-                
-                // Redisplay the table with filtered data
-                displayDataTable();
-                
-                showMessage(`Filtered to ${csvData.length} common dates between both files.`, 'success');
-                return clicksData;
-            }
 
             // Update the table with clicks data
             try {
@@ -1404,6 +1346,10 @@
             
             const hasClicksCheckbox = document.getElementById('hasClicksFile');
             const hasClicksData = hasClicksCheckbox ? hasClicksCheckbox.checked : false;
+            
+            // Update campaign name in preview
+            const campaignName = document.getElementById('campaignName').value || 'Campaign Performance Analysis';
+            document.getElementById('previewCampaignName').textContent = campaignName;
             
             // Get selected rows
             const selectedCheckboxes = document.querySelectorAll('.row-select:checked');
@@ -1761,7 +1707,7 @@
             try {
                 // Load the appropriate template
                 const templateFile = hasClicksData ? './report_template.html' : './report_template_impressions_only.html';
-                const response = await fetch(templateFile);
+                const response = await fetch(templateFile + '?v=' + Date.now());
                 let template = await response.text();
                 
                 // Replace placeholders with actual data
@@ -1871,10 +1817,11 @@
                 // Wait for chart to render
                 setTimeout(() => {
                     html2canvas(iframe.contentDocument.body, {
-                        backgroundColor: null, 
+                        backgroundColor: '#0a0a0a', 
                         scale: 2,
                         useCORS: true,
-                        allowTaint: true
+                        allowTaint: true,
+                        windowHeight: iframe.contentDocument.body.scrollHeight
                     }).then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new window.jspdf.jsPDF({orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height]});
@@ -1920,10 +1867,11 @@
                 // Wait for chart to render
                 setTimeout(() => {
                     html2canvas(iframe.contentDocument.body, {
-                        backgroundColor: null, 
+                        backgroundColor: '#0a0a0a', 
                         scale: 2,
                         useCORS: true,
-                        allowTaint: true
+                        allowTaint: true,
+                        windowHeight: iframe.contentDocument.body.scrollHeight
                     }).then(canvas => {
                     canvas.toBlob(function(blob) {
                         const url = window.URL.createObjectURL(blob);

@@ -55,6 +55,7 @@
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
         }
 
         .youth {
@@ -145,6 +146,9 @@
             padding: 2rem;
             position: relative;
             z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Header */
@@ -196,6 +200,24 @@
         /* Hide footer in PNG exports too */
         .export-mode-container .footer {
             display: none !important;
+        }
+        
+        /* Export mode styles to fill the page */
+        body.export-mode {
+            background: var(--bg-primary) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            min-height: 100vh !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        .export-mode .container {
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            padding-bottom: 3rem !important;
         }
 
         .subtitle {
@@ -335,6 +357,9 @@
         /* Summary Table */
         .summary-section {
             margin-bottom: 4rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .summary-table {
@@ -431,7 +456,8 @@
             text-align: center;
             padding: 3rem 0;
             border-top: 1px solid var(--border-color);
-            margin-top: 4rem;
+            margin-top: auto;
+            padding-top: 4rem;
         }
 
         .footer-text {
@@ -537,8 +563,9 @@
             </div>
         </section>
 
-        <!-- Summary Table -->
+        <!-- Key Insights & Achievements -->
         <section class="summary-section">
+            <h2 class="insights-title youth">Key Insights & Achievements</h2>
             <table class="summary-table">
                 <thead>
                     <tr>
@@ -572,27 +599,6 @@
         </section>
 
         <!-- Insights Section -->
-        <section class="insights-section">
-            <h2 class="insights-title youth">Key Insights & Achievements</h2>
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-icon">🚀</div>
-                    <h3 class="insight-title">Explosive Growth</h3>
-                    <p class="insight-text">{{INSIGHT_GROWTH_TEXT}}</p>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-icon">🎯</div>
-                    <h3 class="insight-title">Superior CTR Performance</h3>
-                    <p class="insight-text">{{INSIGHT_CTR_TEXT}}</p>
-                </div>
-                <div class="insight-card">
-                    <div class="insight-icon">🤖</div>
-                    <h3 class="insight-title">Autonomous Optimization</h3>
-                    <p class="insight-text">The agent independently identified peak performance windows and adjusted bidding strategies, maximizing ROI without human intervention.</p>
-                </div>
-            </div>
-        </section>
-
         <!-- Footer -->
         <footer class="footer">
             <p class="footer-text">Ready to deploy AI agents for your performance marketing?</p>
