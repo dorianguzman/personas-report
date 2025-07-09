@@ -50,7 +50,7 @@ personas-report/
 - **⚡ Zero Installation** - Pure HTML/CSS/JavaScript, runs in browser
 - **📱 Mobile Responsive** - Works on all devices
 - **🔄 Adaptive Reports** - Automatic template selection based on available data
-- **✅ Optional Clicks Data** - Checkbox to enable/disable clicks UI
+- **✅ Optional Affiliate Data** - Track posts with affiliate links and conversion rates
 - **📐 Optimized Layouts** - 4-column metrics grid, clean PDF/PNG exports
 
 ## 🎨 Design System
@@ -61,8 +61,8 @@ personas-report/
 
 ## 📊 Analytics & Metrics
 
-**KPIs:** Total Impressions • Total Clicks • Average CTR • Campaign Duration • Daily Performance • Growth Rate  
-**Advanced:** Growth analysis • Peak identification • Benchmark comparisons • CTR optimization insights
+**KPIs:** Total Impressions • Total Clicks • Affiliate Posts • Affiliate Conversion Rate • Campaign Duration • Daily Performance • Growth Rate  
+**Advanced:** Growth analysis • Peak identification • Performance tracking • Conversion optimization insights
 
 ## 🔧 Technical Features
 
@@ -73,8 +73,8 @@ personas-report/
 ## 📊 Data Requirements
 
 **Required:** CSV with `Date` and `Impressions` columns  
-**Optional:** Check "I have clicks data" to enable clicks UI  
-**Click Entry:** Manual table editing • Separate CSV upload • Filter to common dates  
+**Optional:** Check "I have affiliate posts and clicks data" to enable conversion tracking  
+**Data Entry:** Manual table editing • Separate CSV upload • Auto-fill from CSV columns  
 **Formats:** Multiple date formats supported • Built-in validation • Adaptive UI
 
 ## 🎯 Use Cases

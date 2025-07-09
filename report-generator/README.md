@@ -17,7 +17,7 @@ Professional performance report generator for Twitter/X analytics with beautiful
 ## ✨ Features
 
 **🎨 Visual Design:** Animated hexagons • Floating glow effects • Glass-morphism cards • Professional gradients  
-**📊 Analytics:** Real-time charts • Automatic CTR calculations • Growth rate analysis • Industry benchmarks  
+**📊 Analytics:** Real-time charts • Automatic affiliate conversion calculations • Growth rate analysis • Performance metrics  
 **📄 Export Formats:** HTML • PDF • PNG • CSV • TXT  
 **🔄 Adaptive UI:** Optional clicks data • Dynamic template selection • Conditional metric display  
 **📱 Responsive:** Optimized layouts • 4-column metrics grid • Clean PDF/PNG exports
@@ -28,7 +28,7 @@ Professional performance report generator for Twitter/X analytics with beautiful
 1. Upload impressions CSV from Twitter/X analytics
 2. Enter campaign name
 3. Check "I have clicks data" if applicable
-4. Add clicks (manual entry or CSV upload)
+4. Add affiliate posts and clicks (manual entry or CSV upload)
 5. Generate all reports
 
 **💡 New:** System adapts automatically based on available data - works with impressions-only or full datasets!
@@ -36,10 +36,11 @@ Professional performance report generator for Twitter/X analytics with beautiful
 ## 📊 Data Requirements
 
 **Required:** CSV with `Date` and `Impressions` columns  
-**Optional Click Data:** 
-- Check the "I have clicks data" checkbox
+**Optional Affiliate & Click Data:** 
+- Check the "I have affiliate posts and clicks data" checkbox
 - Enter manually in table or upload separate CSV
-- System hides clicks UI when unchecked
+- Optional: Include `Posts with Affiliate Links` column in your CSV
+- System calculates affiliate conversion rate (clicks/affiliate posts)
 
 ## 🎨 Branding
 

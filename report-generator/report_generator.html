@@ -731,10 +731,10 @@
                 <label class="checkbox-wrapper" style="font-size: 1.1rem;">
                     <input type="checkbox" id="hasClicksFile">
                     <span class="custom-checkbox"></span>
-                    <span class="checkbox-label" style="font-weight: 600; color: var(--text-primary);">I have clicks data (file or manual entry)</span>
+                    <span class="checkbox-label" style="font-weight: 600; color: var(--text-primary);">I have affiliate posts and clicks data (file or manual entry)</span>
                 </label>
                 <p id="clicksHelperText" style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                    Check this box if you want to include clicks data from a CSV file or enter them manually in the table.
+                    Check this box if you want to include affiliate posts and clicks data from CSV files or enter them manually in the table.
                 </p>
             </div>
             
@@ -764,8 +764,9 @@
                     <tr>
                         <th>Date</th>
                         <th>Impressions</th>
+                        <th>Posts with Affiliate Links (Editable)</th>
                         <th>Clicks (Editable)</th>
-                        <th>CTR %</th>
+                        <th>Affiliate Conversion</th>
                     </tr>
                 </thead>
                 <tbody id="dataTableBody">
@@ -790,9 +791,9 @@
                     <div class="metric-change" id="clickChange">-</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-value" id="avgCTR">-</div>
-                    <div class="metric-label">Average CTR</div>
-                    <div class="metric-change" id="ctrBenchmark">-</div>
+                    <div class="metric-value" id="avgConversion">-</div>
+                    <div class="metric-label">Avg Affiliate Conversion</div>
+                    <div class="metric-change" id="conversionBenchmark">Conversion efficiency</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" id="campaignDays">-</div>
@@ -948,7 +949,7 @@
                     const clicksInput = document.getElementById(`clicks-${index}`);
                     if (clicksInput) {
                         clicksInput.value = '0';
-                        updateCTR(index, parseInt(row.Impressions) || 0);
+                        updateConversionRate(index);
                     }
                 });
             }
@@ -999,6 +1000,7 @@
                 console.log('First data line:', lines[1]);
                 
                 csvData = [];
+                let hasAffiliatePostsColumn = false;
 
                 // Check if required columns exist
                 if (!headers.includes('Date') || !headers.includes('Impressions')) {
@@ -1006,6 +1008,9 @@
                     showMessage(`Error: CSV must contain "Date" and "Impressions" columns. Found: ${headers.join(', ')}`, 'error');
                     return;
                 }
+                
+                // Check if optional affiliate posts column exists
+                hasAffiliatePostsColumn = headers.includes('Posts with Affiliate Links') || headers.includes('Affiliate Posts');
 
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim()) {
@@ -1017,6 +1022,10 @@
                     
                     // Only add rows with valid date and impressions
                     if (row.Date && row.Impressions) {
+                        // Store affiliate posts if column exists
+                        if (hasAffiliatePostsColumn) {
+                            row.AffiliatePosts = row['Posts with Affiliate Links'] || row['Affiliate Posts'] || '0';
+                        }
                         csvData.push(row);
                     }
                 }
@@ -1185,7 +1194,7 @@
                     
                     if (clicksInput) {
                         clicksInput.value = clickValue;
-                        updateCTR(index, parseInt(row.Impressions) || 0);
+                        updateConversionRate(index);
                         // Highlight the updated field
                         clicksInput.style.backgroundColor = 'rgba(196, 251, 1, 0.1)';
                         clicksInput.style.border = '1px solid var(--primary-green)';
@@ -1227,8 +1236,9 @@
                     <th><input type="checkbox" id="selectAll" checked></th>
                     <th>Date</th>
                     <th>Impressions</th>
+                    <th>Posts with Affiliate Links (Editable)</th>
                     <th>Clicks (Editable)</th>
-                    <th>CTR %</th>
+                    <th>Affiliate Conversion</th>
                 `;
             } else {
                 thead.innerHTML = `
@@ -1244,14 +1254,16 @@
                 const tr = document.createElement('tr');
                 const date = new Date(row.Date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 const impressions = parseInt(row.Impressions) || 0;
+                const affiliatePosts = parseInt(row.AffiliatePosts) || 0;
 
                 if (hasClicksData) {
                     tr.innerHTML = `
                         <td><input type="checkbox" class="row-select" data-index="${index}" checked></td>
                         <td>${date}</td>
                         <td>${impressions.toLocaleString()}</td>
+                        <td><input type="number" id="affiliatePosts-${index}" placeholder="0" min="0" value="${affiliatePosts}"></td>
                         <td><input type="number" id="clicks-${index}" placeholder="0" min="0" value="0"></td>
-                        <td id="ctr-${index}">0.00%</td>
+                        <td id="conversion-${index}">0.00x</td>
                     `;
                 } else {
                     tr.innerHTML = `
@@ -1263,12 +1275,28 @@
 
                 tbody.appendChild(tr);
 
-                // Only add event listener if clicks column is shown
+                // Only add event listeners if clicks column is shown
                 if (hasClicksData) {
                     const clicksInput = document.getElementById(`clicks-${index}`);
+                    const affiliatePostsInput = document.getElementById(`affiliatePosts-${index}`);
+                    
                     if (clicksInput) {
                         clicksInput.addEventListener('input', function() {
-                            updateCTR(index, impressions);
+                            updateConversionRate(index);
+                            
+                            // Debounce the preview update to prevent chart bouncing
+                            if (updateTimer) {
+                                clearTimeout(updateTimer);
+                            }
+                            updateTimer = setTimeout(() => {
+                                updatePreview();
+                            }, 300); // Wait 300ms after user stops typing
+                        });
+                    }
+                    
+                    if (affiliatePostsInput) {
+                        affiliatePostsInput.addEventListener('input', function() {
+                            updateConversionRate(index);
                             
                             // Debounce the preview update to prevent chart bouncing
                             if (updateTimer) {
@@ -1334,10 +1362,11 @@
             }
         }
 
-        function updateCTR(index, impressions) {
+        function updateConversionRate(index) {
             const clicks = parseInt(document.getElementById(`clicks-${index}`).value) || 0;
-            const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0;
-            document.getElementById(`ctr-${index}`).textContent = `${ctr}%`;
+            const affiliatePosts = parseInt(document.getElementById(`affiliatePosts-${index}`).value) || 0;
+            const conversionRate = affiliatePosts > 0 ? (clicks / affiliatePosts).toFixed(2) : '0.00';
+            document.getElementById(`conversion-${index}`).textContent = `${conversionRate}x`;
         }
 
 
@@ -1357,10 +1386,12 @@
             
             let totalImpressions = 0;
             let totalClicks = 0;
+            let totalAffiliatePosts = 0;
             const chartData = {
                 labels: [],
                 impressions: [],
-                clicks: []
+                clicks: [],
+                affiliatePosts: []
             };
 
             csvData.forEach((row, index) => {
@@ -1371,7 +1402,11 @@
                 
                 if (hasClicksData) {
                     const clicksElement = document.getElementById(`clicks-${index}`);
+                    const affiliatePostsElement = document.getElementById(`affiliatePosts-${index}`);
                     clicks = clicksElement ? (parseInt(clicksElement.value) || 0) : 0;
+                    const affiliatePosts = affiliatePostsElement ? (parseInt(affiliatePostsElement.value) || 0) : 0;
+                    totalAffiliatePosts += affiliatePosts;
+                    chartData.affiliatePosts.push(affiliatePosts);
                 }
                 
                 totalImpressions += impressions;
@@ -1382,7 +1417,7 @@
                 chartData.clicks.push(clicks);
             });
 
-            const avgCTR = (hasClicksData && totalImpressions > 0) ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0;
+            const avgConversionRate = (hasClicksData && totalAffiliatePosts > 0) ? (totalClicks / totalAffiliatePosts).toFixed(2) : '0.00';
             
             // Calculate growth rate safely
             const firstPeriod = chartData.impressions.length >= 3 ? 
@@ -1402,21 +1437,20 @@
             // Update clicks-related metrics only if clicks data is enabled
             if (hasClicksData) {
                 document.getElementById('totalClicks').textContent = totalClicks.toLocaleString();
-                document.getElementById('avgCTR').textContent = `${avgCTR}%`;
+                document.getElementById('avgConversion').textContent = `${avgConversionRate}x`;
                 document.getElementById('clickChange').textContent = chartData.clicks.length > 0 ? 
                     `Peak: ${Math.max(...chartData.clicks)}` : 'Peak: 0';
-                // Calculate benchmark based on 0.5% to 1% range (using 0.75% as midpoint)
-                const benchmarkCTR = 0.75; // 0.75% as the midpoint of 0.5% to 1%
-                document.getElementById('ctrBenchmark').textContent = avgCTR > 0 ? 
-                    `${(avgCTR / benchmarkCTR).toFixed(1)}x benchmark` : '0x benchmark';
+                // Display conversion efficiency
+                document.getElementById('conversionBenchmark').textContent = totalAffiliatePosts > 0 ? 
+                    `${(totalClicks / totalAffiliatePosts).toFixed(2)} clicks per affiliate post` : 'No posts yet';
                 
                 // Show clicks-related metric cards
                 document.querySelector('.metric-card:nth-child(2)').style.display = 'block'; // Total Clicks
-                document.querySelector('.metric-card:nth-child(3)').style.display = 'block'; // Average CTR
+                document.querySelector('.metric-card:nth-child(3)').style.display = 'block'; // Average Conversion
             } else {
                 // Hide clicks-related metric cards
                 document.querySelector('.metric-card:nth-child(2)').style.display = 'none'; // Total Clicks
-                document.querySelector('.metric-card:nth-child(3)').style.display = 'none'; // Average CTR
+                document.querySelector('.metric-card:nth-child(3)').style.display = 'none'; // Average Conversion
             }
 
             // Store report data
@@ -1427,7 +1461,8 @@
                     'No date range',
                 totalImpressions,
                 totalClicks,
-                avgCTR,
+                totalAffiliatePosts,
+                avgConversionRate,
                 growthRate: Math.abs(growthRate),
                 chartData,
                 rawData: csvData
@@ -1437,6 +1472,7 @@
                         return {
                             date: row.Date,
                             impressions: parseInt(row.Impressions) || 0,
+                            affiliatePosts: parseInt(document.getElementById(`affiliatePosts-${originalIndex}`)?.value) || 0,
                             clicks: parseInt(document.getElementById(`clicks-${originalIndex}`)?.value) || 0
                         };
                     })
@@ -1679,29 +1715,29 @@
             const peakImpDay = reportData.chartData.labels[reportData.chartData.impressions.indexOf(Math.max(...reportData.chartData.impressions))];
             const dailyAvgImpressions = Math.round(reportData.totalImpressions / reportData.chartData.labels.length);
             
-            let peakClickDay, dailyAvgClicks, peakCTR, peakCTRDay, clicksGrowth, ctrGrowth;
+            let peakClickDay, dailyAvgClicks, peakConversion, peakConversionDay, clicksGrowth, conversionGrowth;
             
             if (hasClicksData) {
                 peakClickDay = reportData.chartData.labels[reportData.chartData.clicks.indexOf(Math.max(...reportData.chartData.clicks))];
                 dailyAvgClicks = Math.round(reportData.totalClicks / reportData.chartData.labels.length);
                 
-                // Find peak CTR
-                peakCTR = 0;
-                peakCTRDay = '';
+                // Find peak conversion rate
+                peakConversion = 0;
+                peakConversionDay = '';
                 reportData.rawData.forEach((row, idx) => {
-                    if (row.impressions > 0) {
-                        const ctr = (row.clicks / row.impressions) * 100;
-                        if (ctr > peakCTR) {
-                            peakCTR = ctr;
-                            peakCTRDay = reportData.chartData.labels[idx];
+                    if (row.affiliatePosts > 0) {
+                        const conversion = row.clicks / row.affiliatePosts;
+                        if (conversion > peakConversion) {
+                            peakConversion = conversion;
+                            peakConversionDay = reportData.chartData.labels[idx];
                         }
                     }
                 });
-                peakCTR = peakCTR.toFixed(2);
+                peakConversion = peakConversion.toFixed(2);
                 
                 // Calculate growth rates
                 clicksGrowth = dailyAvgClicks > 0 ? Math.round((Math.max(...reportData.chartData.clicks) / dailyAvgClicks - 1) * 100) : 0;
-                ctrGrowth = reportData.avgCTR > 0 ? Math.round((peakCTR / reportData.avgCTR - 1) * 100) : 0;
+                conversionGrowth = parseFloat(reportData.avgConversionRate) > 0 ? Math.round((peakConversion / parseFloat(reportData.avgConversionRate) - 1) * 100) : 0;
             }
             
             try {
@@ -1731,19 +1767,19 @@
                 if (hasClicksData) {
                     Object.assign(replacements, {
                         '{{TOTAL_CLICKS}}': reportData.totalClicks.toLocaleString(),
-                        '{{AVG_CTR}}': reportData.avgCTR,
+                        '{{AVG_CTR}}': reportData.avgConversionRate,
                         '{{CLICKS_GROWTH}}': clicksGrowth,
                         '{{DAILY_AVG_CLICKS}}': dailyAvgClicks,
                         '{{PEAK_CLICKS}}': Math.max(...reportData.chartData.clicks),
                         '{{PEAK_CLICK_DAY}}': peakClickDay,
-                        '{{PEAK_CTR}}': peakCTR,
-                        '{{PEAK_CTR_DAY}}': peakCTRDay,
-                        '{{CTR_GROWTH}}': ctrGrowth,
-                        '{{CTR_PERFORMANCE}}': reportData.avgCTR >= 0.75 ? 'outperformed' : 'matched',
-                        '{{CTR_BENCHMARK}}': (reportData.avgCTR / 0.75).toFixed(1),
-                        '{{CTR_BENCHMARK_TEXT}}': 'Industry benchmark: 0.5-1%',
+                        '{{PEAK_CTR}}': peakConversion,
+                        '{{PEAK_CTR_DAY}}': peakConversionDay,
+                        '{{CTR_GROWTH}}': conversionGrowth,
+                        '{{CTR_PERFORMANCE}}': parseFloat(reportData.avgConversionRate) > 0 ? 'achieved' : 'tracked',
+                        '{{CTR_BENCHMARK}}': parseFloat(reportData.avgConversionRate).toFixed(2),
+                        '{{CTR_BENCHMARK_TEXT}}': reportData.totalAffiliatePosts > 0 ? `${(reportData.totalClicks / reportData.totalAffiliatePosts).toFixed(2)} clicks per affiliate post` : 'No posts yet',
                         '{{INSIGHT_GROWTH_TEXT}}': `The AI agent achieved a ${reportData.growthRate}% growth in impressions within ${reportData.chartData.labels.length} days, demonstrating rapid market adaptation and optimization capabilities.`,
-                        '{{INSIGHT_CTR_TEXT}}': `With an average CTR of ${reportData.avgCTR}%, our agent ${reportData.avgCTR >= 0.75 ? 'outperformed' : 'matched'} industry benchmarks by ${(reportData.avgCTR / 0.75).toFixed(1)}x, showcasing advanced targeting precision.`
+                        '{{INSIGHT_CTR_TEXT}}': `The AI agent achieved an affiliate conversion rate of ${reportData.avgConversionRate}x, generating ${reportData.totalClicks} clicks from ${reportData.totalAffiliatePosts} affiliate posts through advanced targeting algorithms.`
                     });
                 }
                 
@@ -1774,12 +1810,13 @@
                 return '';
             }
             
-            let csvContent = 'Date,Impressions,Clicks,CTR\n';
+            let csvContent = 'Date,Impressions,Posts with Affiliate Links,Clicks,Affiliate Conversion\n';
             csvData.forEach((row, index) => {
                 const clicks = document.getElementById('clicks-' + index)?.value || 0;
+                const affiliatePosts = document.getElementById('affiliatePosts-' + index)?.value || 0;
                 const impressions = parseInt(row.Impressions) || 0;
-                const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0;
-                csvContent += '"' + row.Date + '",' + impressions + ',' + clicks + ',' + ctr + '%\n';
+                const conversionRate = affiliatePosts > 0 ? (clicks / affiliatePosts).toFixed(2) : '0.00';
+                csvContent += '"' + row.Date + '",' + impressions + ',' + affiliatePosts + ',' + clicks + ',' + conversionRate + 'x\n';
             });
             
             return csvContent;
@@ -1953,12 +1990,13 @@
                 return;
             }
             
-            let csvContent = 'Date,Impressions,Clicks,CTR\n';
+            let csvContent = 'Date,Impressions,Posts with Affiliate Links,Clicks,Affiliate Conversion\n';
             csvData.forEach((row, index) => {
                 const clicks = document.getElementById('clicks-' + index)?.value || 0;
+                const affiliatePosts = document.getElementById('affiliatePosts-' + index)?.value || 0;
                 const impressions = parseInt(row.Impressions) || 0;
-                const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0;
-                csvContent += '"' + row.Date + '",' + impressions + ',' + clicks + ',' + ctr + '%\n';
+                const conversionRate = affiliatePosts > 0 ? (clicks / affiliatePosts).toFixed(2) : '0.00';
+                csvContent += '"' + row.Date + '",' + impressions + ',' + affiliatePosts + ',' + clicks + ',' + conversionRate + 'x\n';
             });
             
             const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -1991,7 +2029,8 @@
             
             if (hasClicksData) {
                 summary += 'Total Clicks: ' + (reportData.totalClicks?.toLocaleString() || 0) + '\n' +
-                    'Average CTR: ' + (reportData.avgCTR || 0) + '%\n';
+                    'Total Affiliate Posts: ' + (reportData.totalAffiliatePosts?.toLocaleString() || 0) + '\n' +
+                    'Avg Affiliate Conversion: ' + (reportData.avgConversionRate || '0.00') + 'x\n';
             }
             
             summary += 'Growth Rate: +' + (reportData.growthRate || 0) + '%\n\n' +
@@ -1999,8 +2038,8 @@
                 '----------------------\n';
             
             if (hasClicksData) {
-                summary += '• Achieved ' + (reportData.avgCTR || 0) + '% average CTR (industry benchmark: 0.5-1%)\n' +
-                    '• Generated ' + (reportData.totalClicks?.toLocaleString() || 0) + ' total clicks\n';
+                summary += '• Achieved ' + (reportData.avgConversionRate || '0.00') + 'x average affiliate conversion rate\n' +
+                    '• Generated ' + (reportData.totalClicks?.toLocaleString() || 0) + ' total clicks from ' + (reportData.totalAffiliatePosts?.toLocaleString() || 0) + ' affiliate posts\n';
             } else {
                 summary += '• Reached ' + (reportData.totalImpressions?.toLocaleString() || 0) + ' total impressions\n' +
                     '• Daily average of ' + Math.round(reportData.totalImpressions / reportData.chartData.labels.length).toLocaleString() + ' impressions\n';
